@@ -1,4 +1,7 @@
-import * as maplibregl from "maplibre-gl";
+import { Map, NavigationControl, setWorkerUrl } from "maplibre-gl";
+import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+
+setWorkerUrl(mapLibreWorkerUrl);
 
 export const MALTA_VIEW = {
   center: [14.385, 35.94],
@@ -13,7 +16,7 @@ const MALTA_BOUNDS = [
 ];
 
 export function createMaltaMap(container) {
-  const map = new maplibregl.Map({
+  const map = new Map({
     container,
     style: "https://tiles.openfreemap.org/styles/bright",
     ...MALTA_VIEW,
@@ -31,7 +34,7 @@ export function createMaltaMap(container) {
   map.touchZoomRotate.disableRotation();
 
   map.addControl(
-    new maplibregl.NavigationControl({
+    new NavigationControl({
       showCompass: false,
       showZoom: true
     }),
