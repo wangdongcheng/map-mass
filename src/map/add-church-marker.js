@@ -45,6 +45,9 @@ function createChurchBubble(church) {
 
 export function addChurchMarker(map, church) {
   const bubble = createChurchBubble(church);
+  const markerAnchor = document.createElement("div");
+  markerAnchor.className = "church-marker-anchor";
+  markerAnchor.append(bubble);
 
   bubble.addEventListener("click", () => {
     const prefersReducedMotion = window.matchMedia(
@@ -60,7 +63,7 @@ export function addChurchMarker(map, church) {
   });
 
   return new Marker({
-    element: bubble,
+    element: markerAnchor,
     anchor: "bottom"
   })
     .setLngLat(church.coordinates)

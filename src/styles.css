@@ -127,6 +127,10 @@ body {
   font-weight: 700;
 }
 
+.church-marker-anchor {
+  width: max-content;
+}
+
 .church-mass-bubble {
   position: relative;
   width: 238px;
