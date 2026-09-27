@@ -64,7 +64,8 @@ export function addChurchMarker(map, church) {
 
   return new Marker({
     element: markerAnchor,
-    anchor: "bottom"
+    anchor: "bottom",
+    offset: [0, -64]
   })
     .setLngLat(church.coordinates)
     .addTo(map);
