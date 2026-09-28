@@ -39,20 +39,27 @@ function parseTime(time) {
   return hour * 60 + minute;
 }
 
-export function isMassInProgress(masses, date = new Date()) {
+export function getMassesInProgress(masses, date = new Date()) {
   const now = getMaltaDayAndMinute(date);
 
-  return masses.some((mass) => {
-    if (mass.day !== now.day) {
-      return false;
-    }
+  return {
+    day: now.day,
+    masses: masses.filter((mass) => {
+      if (mass.day !== now.day) {
+        return false;
+      }
 
-    const start = parseTime(mass.time);
+      const start = parseTime(mass.time);
 
-    return (
-      start !== null &&
-      now.minute >= start &&
-      now.minute < start + MASS_DURATION_MINUTES
-    );
-  });
+      return (
+        start !== null &&
+        now.minute >= start &&
+        now.minute < start + MASS_DURATION_MINUTES
+      );
+    })
+  };
+}
+
+export function isMassInProgress(masses, date = new Date()) {
+  return getMassesInProgress(masses, date).masses.length > 0;
 }

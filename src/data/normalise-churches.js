@@ -116,7 +116,11 @@ function createSchedule(masses) {
     });
   });
 
-  return schedule.map(({ days, entries }) => ({ days, entries }));
+  return schedule.map(({ days, startDay, endDayIndex, entries }) => ({
+    days,
+    dayNames: DAYS.slice(DAYS.indexOf(startDay), endDayIndex + 1),
+    entries
+  }));
 }
 
 export function normaliseChurches(churchRecords, massRecords) {

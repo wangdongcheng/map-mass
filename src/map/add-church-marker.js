@@ -1,37 +1,77 @@
 import { Marker } from "maplibre-gl";
-import { isMassInProgress } from "../data/current-mass.js";
+import { getMassesInProgress } from "../data/current-mass.js";
+
+const SHORT_DAY_NAMES = {
+  Monday: "Mon",
+  Tuesday: "Tue",
+  Wednesday: "Wed",
+  Thursday: "Thu",
+  Friday: "Fri",
+  Saturday: "Sat",
+  Sunday: "Sun"
+};
+
+function formatDays(dayNames) {
+  if (dayNames.length === 1) {
+    return SHORT_DAY_NAMES[dayNames[0]];
+  }
+
+  return `${SHORT_DAY_NAMES[dayNames[0]]}–${SHORT_DAY_NAMES[dayNames.at(-1)]}`;
+}
 
 function createMassTimes(schedule) {
-  const list = document.createElement("dl");
-  list.className = "mass-time-list";
+  const wrapper = document.createElement("div");
+  wrapper.className = "mass-time-table-wrap";
 
-  schedule.forEach(({ days, entries }) => {
-    const day = document.createElement("dt");
-    day.textContent = days;
+  const table = document.createElement("table");
+  table.className = "mass-time-table";
 
-    const time = document.createElement("dd");
+  const header = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  schedule.forEach(({ dayNames }) => {
+    const day = document.createElement("th");
+    day.scope = "col";
+    day.textContent = formatDays(dayNames);
+    headerRow.append(day);
+  });
+  header.append(headerRow);
 
-    entries.forEach((entry) => {
-      const mass = document.createElement("span");
-      mass.className = "mass-time-entry";
+  const body = document.createElement("tbody");
+  const rowCount = Math.max(...schedule.map(({ entries }) => entries.length));
 
-      const label = document.createElement("span");
-      label.textContent = entry.time;
-      mass.append(label);
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+    const row = document.createElement("tr");
 
-      if (entry.note) {
-        const note = document.createElement("small");
-        note.textContent = entry.note;
-        mass.append(note);
+    schedule.forEach(({ dayNames, entries }) => {
+      const cell = document.createElement("td");
+      const entry = entries[rowIndex];
+
+      if (entry) {
+        const mass = document.createElement("span");
+        mass.className = "mass-time-entry";
+        mass.dataset.days = dayNames.join(",");
+        mass.dataset.time = entry.time;
+        mass.textContent = entry.time;
+
+        if (entry.note) {
+          const note = document.createElement("small");
+          note.textContent = entry.note;
+          mass.append(note);
+        }
+
+        cell.append(mass);
       }
 
-      time.append(mass);
+      row.append(cell);
     });
 
-    list.append(day, time);
-  });
+    body.append(row);
+  }
 
-  return list;
+  table.append(header, body);
+  wrapper.append(table);
+
+  return wrapper;
 }
 
 function createLanguageTabs(church) {
@@ -206,7 +246,22 @@ export function addChurchMarker(map, church) {
   });
 
   const updateCurrentMassStatus = (date = new Date()) => {
-    currentMass.hidden = !isMassInProgress(church.masses, date);
+    const current = getMassesInProgress(church.masses, date);
+    const activeTimes = new Set(current.masses.map(({ time }) => time));
+    currentMass.hidden = activeTimes.size === 0;
+
+    bubble.querySelectorAll(".mass-time-entry").forEach((entry) => {
+      const isCurrent =
+        entry.dataset.days.split(",").includes(current.day) &&
+        activeTimes.has(entry.dataset.time);
+      entry.classList.toggle("is-current-mass", isCurrent);
+
+      if (isCurrent) {
+        entry.setAttribute("aria-current", "time");
+      } else {
+        entry.removeAttribute("aria-current");
+      }
+    });
   };
 
   updateCurrentMassStatus();

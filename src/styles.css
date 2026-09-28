@@ -396,41 +396,74 @@ body {
   flex-direction: column;
 }
 
-.church-language-panel .mass-time-list {
+.church-language-panel .mass-time-table-wrap {
   flex: 1 1 auto;
 }
 
-.mass-time-list {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 5px 10px;
+.mass-time-table-wrap {
   min-height: 0;
   margin: 0 0 11px;
-  padding-right: 3px;
-  overflow-y: auto;
+  overflow: auto;
   font-size: 0.73rem;
   line-height: 1.3;
   scrollbar-color: rgb(207 20 43 / 45%) transparent;
   scrollbar-width: thin;
 }
 
-.mass-time-list dt {
-  color: #a5122a;
-  font-weight: 650;
+.mass-time-table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: separate;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
-.mass-time-list dd {
-  display: grid;
-  gap: 3px;
-  margin: 0;
+.mass-time-table th,
+.mass-time-table td {
+  min-width: 55px;
+  padding: 5px 6px;
+  border-right: 1px solid rgb(207 20 43 / 12%);
+  border-bottom: 1px solid rgb(207 20 43 / 12%);
+}
+
+.mass-time-table th:last-child,
+.mass-time-table td:last-child {
+  border-right: 0;
+}
+
+.mass-time-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.mass-time-table th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  color: #a5122a;
+  background: #fff7f8;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.mass-time-table td {
+  height: 31px;
+  padding: 3px;
   color: #4f101d;
-  font-variant-numeric: tabular-nums;
-  font-weight: 760;
-  text-align: right;
+  background: #fff;
 }
 
 .mass-time-entry {
   display: block;
+  padding: 4px 5px;
+  border-radius: 7px;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.mass-time-entry.is-current-mass {
+  color: #fff;
+  background: #cf142b;
+  box-shadow: 0 3px 8px rgb(95 14 29 / 22%);
 }
 
 .mass-time-entry small {
@@ -438,6 +471,10 @@ body {
   color: #925261;
   font-size: 0.64rem;
   font-weight: 600;
+}
+
+.mass-time-entry.is-current-mass small {
+  color: rgb(255 255 255 / 82%);
 }
 
 @media (prefers-reduced-motion: reduce) {
