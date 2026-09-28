@@ -19,6 +19,10 @@ map.on("load", async () => {
     const churches = await churchesPromise;
     churches.forEach((church) => addChurchMarker(map, church));
     loading.hidden = true;
+
+    import("./map/add-marija-regina-layer.js")
+      .then(({ addMarijaReginaLayer }) => addMarijaReginaLayer(map))
+      .catch((error) => console.error("Church model could not be loaded", error));
   } catch (error) {
     loadingCard.textContent = "Church data could not be loaded";
     console.error(error);
