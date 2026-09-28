@@ -128,7 +128,7 @@ body {
 }
 
 .church-marker-anchor {
-  position: relative;
+  position: absolute;
   width: 24px;
   height: 24px;
   z-index: 1;
