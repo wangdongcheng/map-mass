@@ -53,13 +53,21 @@ function createChurchBubble(church) {
   name.className = "church-mass-bubble__name";
   name.textContent = church.name;
 
+  const type = document.createElement("span");
+  type.className = "church-mass-bubble__type";
+  type.textContent = church.type;
+
   const language = document.createElement("span");
   language.className = "church-mass-bubble__language";
   language.textContent = church.languages.join(" · ");
 
+  bubble.append(eyebrow, name);
+
+  if (church.type) {
+    bubble.append(type);
+  }
+
   bubble.append(
-    eyebrow,
-    name,
     createMassTimes(church.massTimes, church.languages.length > 1),
     language
   );

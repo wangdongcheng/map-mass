@@ -263,8 +263,20 @@ body {
 
 .church-mass-bubble__name {
   display: block;
-  margin: 3px 0 10px;
+  margin: 3px 0 7px;
   font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.church-mass-bubble__type {
+  align-self: flex-start;
+  margin-bottom: 10px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #754a35;
+  background: rgb(173 110 76 / 13%);
+  font-size: 0.66rem;
+  font-weight: 750;
   line-height: 1.2;
 }
 
