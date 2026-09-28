@@ -1,15 +1,33 @@
 import { Marker } from "maplibre-gl";
 
-function createMassTimes(schedule) {
+function createMassTimes(schedule, showLanguages) {
   const list = document.createElement("dl");
   list.className = "mass-time-list";
 
-  schedule.forEach(({ days, times }) => {
+  schedule.forEach(({ days, entries }) => {
     const day = document.createElement("dt");
     day.textContent = days;
 
     const time = document.createElement("dd");
-    time.textContent = times.join(" · ");
+
+    entries.forEach((entry) => {
+      const mass = document.createElement("span");
+      mass.className = "mass-time-entry";
+
+      const label = document.createElement("span");
+      label.textContent = showLanguages && entry.language
+        ? `${entry.time} · ${entry.language}`
+        : entry.time;
+      mass.append(label);
+
+      if (entry.note) {
+        const note = document.createElement("small");
+        note.textContent = entry.note;
+        mass.append(note);
+      }
+
+      time.append(mass);
+    });
 
     list.append(day, time);
   });
@@ -18,9 +36,10 @@ function createMassTimes(schedule) {
 }
 
 function createChurchBubble(church) {
-  const bubble = document.createElement("button");
+  const bubble = document.createElement("div");
   bubble.className = "church-mass-bubble";
-  bubble.type = "button";
+  bubble.tabIndex = 0;
+  bubble.setAttribute("role", "button");
   bubble.setAttribute(
     "aria-label",
     `Zoom to ${church.name}, ${church.locality}`
@@ -36,9 +55,14 @@ function createChurchBubble(church) {
 
   const language = document.createElement("span");
   language.className = "church-mass-bubble__language";
-  language.textContent = church.language;
+  language.textContent = church.languages.join(" · ");
 
-  bubble.append(eyebrow, name, createMassTimes(church.massTimes), language);
+  bubble.append(
+    eyebrow,
+    name,
+    createMassTimes(church.massTimes, church.languages.length > 1),
+    language
+  );
 
   return bubble;
 }
@@ -47,9 +71,18 @@ export function addChurchMarker(map, church) {
   const bubble = createChurchBubble(church);
   const markerAnchor = document.createElement("div");
   markerAnchor.className = "church-marker-anchor";
-  markerAnchor.append(bubble);
 
-  bubble.addEventListener("click", () => {
+  const cross = document.createElement("button");
+  cross.className = "church-cross";
+  cross.type = "button";
+  cross.setAttribute("aria-label", `Show Mass times for ${church.name}`);
+
+  const stopMapInteraction = (event) => event.stopPropagation();
+  cross.addEventListener("pointerdown", stopMapInteraction);
+  bubble.addEventListener("pointerdown", stopMapInteraction);
+  cross.addEventListener("click", () => bubble.focus());
+
+  const zoomToChurch = () => {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -60,12 +93,21 @@ export function addChurchMarker(map, church) {
       duration: prefersReducedMotion ? 0 : 1600,
       essential: !prefersReducedMotion
     });
+  };
+
+  bubble.addEventListener("click", zoomToChurch);
+  bubble.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      zoomToChurch();
+    }
   });
+
+  markerAnchor.append(cross, bubble);
 
   return new Marker({
     element: markerAnchor,
-    anchor: "bottom",
-    offset: [0, -64]
+    anchor: "center"
   })
     .setLngLat(church.coordinates)
     .addTo(map);

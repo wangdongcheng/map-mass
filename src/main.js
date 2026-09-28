@@ -1,6 +1,6 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles.css";
-import { MARIJA_REGINA } from "./data/marija-regina.js";
+import { loadChurches } from "./data/load-churches.js";
 import { addBuildingLayer } from "./map/add-building-layer.js";
 import { addChurchMarker } from "./map/add-church-marker.js";
 import { createMaltaMap, MALTA_VIEW } from "./map/create-map.js";
@@ -10,11 +10,19 @@ const loadingCard = document.querySelector(".loading-card");
 const resetView = document.querySelector("#reset-view");
 
 const map = createMaltaMap("map");
+const churchesPromise = loadChurches();
 
-map.on("load", () => {
+map.on("load", async () => {
   addBuildingLayer(map);
-  addChurchMarker(map, MARIJA_REGINA);
-  loading.hidden = true;
+
+  try {
+    const churches = await churchesPromise;
+    churches.forEach((church) => addChurchMarker(map, church));
+    loading.hidden = true;
+  } catch (error) {
+    loadingCard.textContent = "Church data could not be loaded";
+    console.error(error);
+  }
 });
 
 map.on("error", (event) => {
