@@ -182,6 +182,50 @@ body {
   border-radius: 7px;
 }
 
+.current-mass-indicator {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  display: grid;
+  width: 27px;
+  height: 23px;
+  place-items: center;
+  border: 1px solid rgb(207 20 43 / 34%);
+  border-radius: 10px;
+  color: #8b0f23;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 5px 12px rgb(95 14 29 / 25%);
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+  animation: current-mass-ring 2.4s ease-in-out infinite;
+}
+
+.current-mass-indicator::after {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid rgb(207 20 43 / 34%);
+  border-bottom: 1px solid rgb(207 20 43 / 34%);
+  background: #fff;
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.current-mass-indicator[hidden] {
+  display: none;
+}
+
+.church-marker-anchor:hover .current-mass-indicator,
+.church-marker-anchor:focus-within .current-mass-indicator {
+  opacity: 0;
+}
+
 .church-marker-anchor:hover .church-cross,
 .church-marker-anchor:focus-within .church-cross {
   opacity: 0;
@@ -398,8 +442,34 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .church-cross,
+  .current-mass-indicator,
   .church-mass-bubble {
     transition: none;
+    animation: none;
+  }
+}
+
+@keyframes current-mass-ring {
+  0%,
+  82%,
+  100% {
+    transform: translateX(-50%) rotate(0);
+  }
+
+  86% {
+    transform: translateX(-50%) rotate(-8deg);
+  }
+
+  90% {
+    transform: translateX(-50%) rotate(8deg);
+  }
+
+  94% {
+    transform: translateX(-50%) rotate(-5deg);
+  }
+
+  98% {
+    transform: translateX(-50%) rotate(4deg);
   }
 }
 

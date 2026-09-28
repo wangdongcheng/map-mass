@@ -17,7 +17,15 @@ map.on("load", async () => {
 
   try {
     const churches = await churchesPromise;
-    churches.forEach((church) => addChurchMarker(map, church));
+    const churchMarkers = churches.map((church) => addChurchMarker(map, church));
+    const refreshCurrentMasses = () => {
+      const now = new Date();
+      churchMarkers.forEach(({ updateCurrentMassStatus }) =>
+        updateCurrentMassStatus(now)
+      );
+    };
+    const currentMassTimer = window.setInterval(refreshCurrentMasses, 30_000);
+    map.once("remove", () => window.clearInterval(currentMassTimer));
     loading.hidden = true;
 
     import("./map/add-marija-regina-layer.js")

@@ -1,4 +1,5 @@
 import { Marker } from "maplibre-gl";
+import { isMassInProgress } from "../data/current-mass.js";
 
 function createMassTimes(schedule) {
   const list = document.createElement("dl");
@@ -167,6 +168,13 @@ export function addChurchMarker(map, church) {
   cross.type = "button";
   cross.setAttribute("aria-label", `Show Mass times for ${church.name}`);
 
+  const currentMass = document.createElement("span");
+  currentMass.className = "current-mass-indicator";
+  currentMass.setAttribute("role", "status");
+  currentMass.setAttribute("aria-label", "Mass in progress");
+  currentMass.title = "Mass in progress";
+  currentMass.textContent = "🔔";
+
   const stopMapInteraction = (event) => event.stopPropagation();
   cross.addEventListener("pointerdown", stopMapInteraction);
   bubble.addEventListener("pointerdown", stopMapInteraction);
@@ -197,12 +205,19 @@ export function addChurchMarker(map, church) {
     }
   });
 
-  markerAnchor.append(cross, bubble);
+  const updateCurrentMassStatus = (date = new Date()) => {
+    currentMass.hidden = !isMassInProgress(church.masses, date);
+  };
 
-  return new Marker({
+  updateCurrentMassStatus();
+  markerAnchor.append(cross, currentMass, bubble);
+
+  const marker = new Marker({
     element: markerAnchor,
     anchor: "center"
   })
     .setLngLat(church.coordinates)
     .addTo(map);
+
+  return { marker, updateCurrentMassStatus };
 }
