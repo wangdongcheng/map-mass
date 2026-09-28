@@ -155,6 +155,16 @@ export function normaliseChurches(churchRecords, massRecords) {
         type: record.Type ? String(record.Type) : "",
         coordinates: [longitude, latitude],
         massTimes: createSchedule(masses),
+        massTimesByLanguage: Object.fromEntries(
+          languages.map((language) => [
+            language,
+            createSchedule(
+              [...masses.values()].filter(
+                (mass) => mass.language === language
+              )
+            )
+          ])
+        ),
         languages,
         sourceUrl: record["Source URL"]
           ? String(record["Source URL"])

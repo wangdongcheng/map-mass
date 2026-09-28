@@ -1,6 +1,6 @@
 import { Marker } from "maplibre-gl";
 
-function createMassTimes(schedule, showLanguages) {
+function createMassTimes(schedule) {
   const list = document.createElement("dl");
   list.className = "mass-time-list";
 
@@ -15,9 +15,7 @@ function createMassTimes(schedule, showLanguages) {
       mass.className = "mass-time-entry";
 
       const label = document.createElement("span");
-      label.textContent = showLanguages && entry.language
-        ? `${entry.time} · ${entry.language}`
-        : entry.time;
+      label.textContent = entry.time;
       mass.append(label);
 
       if (entry.note) {
@@ -35,14 +33,97 @@ function createMassTimes(schedule, showLanguages) {
   return list;
 }
 
+function createLanguageTabs(church) {
+  const tabs = document.createElement("div");
+  tabs.className = "church-language-tabs";
+
+  const tabList = document.createElement("div");
+  tabList.className = "church-language-tabs__list";
+  tabList.setAttribute("role", "tablist");
+  tabList.setAttribute("aria-label", "Mass language");
+
+  const tabButtons = [];
+  const panels = [];
+
+  const activateTab = (activeIndex, moveFocus = false) => {
+    tabButtons.forEach((tab, index) => {
+      const isActive = index === activeIndex;
+      tab.setAttribute("aria-selected", String(isActive));
+      tab.tabIndex = isActive ? 0 : -1;
+      panels[index].hidden = !isActive;
+    });
+
+    if (moveFocus) {
+      tabButtons[activeIndex].focus();
+    }
+  };
+
+  church.languages.forEach((language, index) => {
+    const tabId = `${church.id}-language-tab-${index}`;
+    const panelId = `${church.id}-language-panel-${index}`;
+    const tab = document.createElement("button");
+    tab.className = "church-language-tab";
+    tab.type = "button";
+    tab.id = tabId;
+    tab.textContent = language;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panelId);
+
+    const panel = document.createElement("div");
+    panel.className = "church-language-panel";
+    panel.id = panelId;
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", tabId);
+    panel.append(createMassTimes(church.massTimesByLanguage[language]));
+
+    tab.addEventListener("pointerdown", (event) => event.stopPropagation());
+    tab.addEventListener("click", (event) => {
+      event.stopPropagation();
+      activateTab(index);
+    });
+    tab.addEventListener("keydown", (event) => {
+      let nextIndex;
+
+      if (event.key === "ArrowRight") {
+        nextIndex = (index + 1) % tabButtons.length;
+      } else if (event.key === "ArrowLeft") {
+        nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+      } else if (event.key === "Home") {
+        nextIndex = 0;
+      } else if (event.key === "End") {
+        nextIndex = tabButtons.length - 1;
+      } else {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      activateTab(nextIndex, true);
+    });
+
+    tabButtons.push(tab);
+    panels.push(panel);
+    tabList.append(tab);
+    tabs.append(panel);
+  });
+
+  tabs.prepend(tabList);
+  activateTab(0);
+
+  return tabs;
+}
+
 function createChurchBubble(church) {
+  const hasLanguageTabs = church.languages.length > 1;
   const bubble = document.createElement("div");
   bubble.className = "church-mass-bubble";
   bubble.tabIndex = 0;
-  bubble.setAttribute("role", "button");
+  bubble.setAttribute("role", hasLanguageTabs ? "group" : "button");
   bubble.setAttribute(
     "aria-label",
-    `Zoom to ${church.name}, ${church.locality}`
+    hasLanguageTabs
+      ? `Mass times for ${church.name}, ${church.locality}. Click the card to zoom.`
+      : `Zoom to ${church.name}, ${church.locality}`
   );
 
   const eyebrow = document.createElement("span");
@@ -67,10 +148,11 @@ function createChurchBubble(church) {
     bubble.append(type);
   }
 
-  bubble.append(
-    createMassTimes(church.massTimes, church.languages.length > 1),
-    language
-  );
+  if (hasLanguageTabs) {
+    bubble.append(createLanguageTabs(church));
+  } else {
+    bubble.append(createMassTimes(church.massTimes), language);
+  }
 
   return bubble;
 }
@@ -105,6 +187,10 @@ export function addChurchMarker(map, church) {
 
   bubble.addEventListener("click", zoomToChurch);
   bubble.addEventListener("keydown", (event) => {
+    if (event.target !== bubble) {
+      return;
+    }
+
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       zoomToChurch();

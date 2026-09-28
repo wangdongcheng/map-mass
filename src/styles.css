@@ -297,6 +297,65 @@ body {
   line-height: 1.2;
 }
 
+.church-language-tabs {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.church-language-tabs__list {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding-bottom: 7px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgb(207 20 43 / 16%);
+  scrollbar-width: thin;
+}
+
+.church-language-tab {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border: 1px solid rgb(207 20 43 / 30%);
+  border-radius: 999px;
+  color: #a5122a;
+  background: #fff;
+  font: inherit;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.church-language-tab:hover {
+  background: #fff3f5;
+}
+
+.church-language-tab[aria-selected="true"] {
+  border-color: #cf142b;
+  color: #fff;
+  background: #cf142b;
+}
+
+.church-language-tab:focus-visible {
+  outline: 2px solid rgb(207 20 43 / 40%);
+  outline-offset: 2px;
+}
+
+.church-language-panel:not([hidden]) {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.church-language-panel .mass-time-list {
+  flex: 1 1 auto;
+}
+
 .mass-time-list {
   display: grid;
   grid-template-columns: auto 1fr;
