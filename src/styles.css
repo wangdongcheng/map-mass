@@ -283,15 +283,15 @@ body {
   left: 50%;
   bottom: calc(100% + 4px);
   display: grid;
-  width: 27px;
-  height: 23px;
+  width: 34px;
+  height: 29px;
   place-items: center;
   border: 1px solid rgb(207 20 43 / 34%);
   border-radius: 10px;
   color: #8b0f23;
   background: rgb(255 255 255 / 96%);
   box-shadow: 0 5px 12px rgb(95 14 29 / 25%);
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1;
   cursor: pointer;
   transform: translateX(-50%);
@@ -302,9 +302,9 @@ body {
 .current-mass-indicator::after {
   position: absolute;
   left: 50%;
-  bottom: -4px;
-  width: 7px;
-  height: 7px;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
   border-right: 1px solid rgb(207 20 43 / 34%);
   border-bottom: 1px solid rgb(207 20 43 / 34%);
   background: #fff;
