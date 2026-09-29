@@ -1,3 +1,7 @@
+import {
+  BOOKMARKS_CHANGED_EVENT,
+  getBookmarkedChurchIds
+} from "../data/church-bookmarks.js";
 import { getUpcomingMasses } from "../data/current-mass.js";
 
 const MAX_RESULTS = 8;
@@ -65,6 +69,7 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
   const input = document.querySelector("#church-search-input");
   const results = document.querySelector("#church-search-results");
   const index = churches.map(createSearchEntry);
+  const churchesById = new Map(churches.map((church) => [church.id, church]));
   let matches = [];
   let activeIndex = -1;
 
@@ -127,9 +132,45 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     return option;
   };
 
+  const renderBookmarks = () => {
+    const bookmarkedChurches = getBookmarkedChurchIds().flatMap((churchId) => {
+      const church = churchesById.get(churchId);
+      return church ? [church] : [];
+    });
+
+    if (!bookmarkedChurches.length) {
+      return;
+    }
+
+    const heading = document.createElement("p");
+    heading.className = "church-search__heading";
+    heading.textContent = "Bookmarks";
+    results.append(heading);
+
+    bookmarkedChurches.forEach((church) => {
+      const resultIndex = matches.length;
+      matches.push({ church });
+
+      const option = createOption(resultIndex, church);
+      option.classList.add("church-search__option--bookmark");
+
+      const name = document.createElement("strong");
+      name.textContent = church.localName || church.name;
+
+      const locality = document.createElement("span");
+      locality.className = "church-search__address";
+      locality.textContent = church.locality;
+
+      option.append(name, locality);
+      results.append(option);
+    });
+  };
+
   const renderUpcomingMasses = () => {
-    matches = getUpcomingMasses(churches, new Date(), MAX_RESULTS).map(
-      (upcoming) => ({ church: upcoming.church, upcoming })
+    const upcomingMasses = getUpcomingMasses(
+      churches,
+      new Date(),
+      MAX_RESULTS
     );
 
     const heading = document.createElement("p");
@@ -137,7 +178,7 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     heading.textContent = "Upcoming Masses";
     results.append(heading);
 
-    if (!matches.length) {
+    if (!upcomingMasses.length) {
       const empty = document.createElement("p");
       empty.className = "church-search__empty";
       empty.textContent = "No upcoming Masses found";
@@ -145,7 +186,10 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
       return;
     }
 
-    matches.forEach(({ church, upcoming }, resultIndex) => {
+    upcomingMasses.forEach((upcoming) => {
+      const church = upcoming.church;
+      const resultIndex = matches.length;
+      matches.push({ church, upcoming });
       const option = createOption(resultIndex, church);
       option.classList.add("church-search__option--mass");
 
@@ -216,6 +260,7 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
   };
 
   const renderResults = () => {
+    matches = [];
     activeIndex = -1;
     input.removeAttribute("aria-activedescendant");
     results.replaceChildren();
@@ -223,6 +268,7 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     if (input.value.trim()) {
       renderChurchMatches();
     } else {
+      renderBookmarks();
       renderUpcomingMasses();
     }
 
@@ -258,5 +304,13 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
   const upcomingMassTimer = window.setInterval(() => {
     if (!results.hidden && !input.value.trim()) renderResults();
   }, 30_000);
-  map.once("remove", () => window.clearInterval(upcomingMassTimer));
+
+  const refreshOpenBookmarks = () => {
+    if (!results.hidden && !input.value.trim()) renderResults();
+  };
+  window.addEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
+  map.once("remove", () => {
+    window.clearInterval(upcomingMassTimer);
+    window.removeEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
+  });
 }

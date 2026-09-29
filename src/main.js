@@ -12,17 +12,59 @@ const resetView = document.querySelector("#reset-view");
 
 const map = createMaltaMap("map");
 const churchesPromise = loadChurches();
+let churchMarkers = [];
+let churchMarkersById = new Map();
+
+function getChurchIdFromPath() {
+  return /^\/(\d{4})\/?$/.exec(window.location.pathname)?.[1] ?? null;
+}
+
+function showMaltaView({ updateUrl = true } = {}) {
+  churchMarkers.forEach(({ close }) => close());
+  map.easeTo({
+    ...MALTA_VIEW,
+    duration: 900
+  });
+
+  if (updateUrl && window.location.pathname !== "/") {
+    window.history.pushState(null, "", "/");
+  }
+}
+
+function applyPathToMap() {
+  const churchId = getChurchIdFromPath();
+  const markerController = churchId
+    ? churchMarkersById.get(churchId)
+    : null;
+
+  if (markerController) {
+    markerController.focus({ updateUrl: false });
+    return;
+  }
+
+  showMaltaView({ updateUrl: false });
+
+  if (window.location.pathname !== "/") {
+    window.history.replaceState(null, "", "/");
+  }
+}
 
 map.on("load", async () => {
   addBuildingLayer(map);
 
   try {
     const churches = await churchesPromise;
-    const churchMarkers = churches.map((church) => addChurchMarker(map, church));
-    const churchMarkersById = new Map(
+    churchMarkers = churches.map((church) => addChurchMarker(map, church));
+    churchMarkersById = new Map(
       churchMarkers.map((controller) => [controller.churchId, controller])
     );
     initialiseChurchSearch(map, churches, churchMarkersById);
+    const handleHistoryNavigation = () => applyPathToMap();
+    window.addEventListener("popstate", handleHistoryNavigation);
+    map.once("remove", () =>
+      window.removeEventListener("popstate", handleHistoryNavigation)
+    );
+    applyPathToMap();
     const refreshCurrentMasses = () => {
       const now = new Date();
       churchMarkers.forEach(({ updateCurrentMassStatus }) =>
@@ -51,8 +93,5 @@ map.on("error", (event) => {
 });
 
 resetView.addEventListener("click", () => {
-  map.easeTo({
-    ...MALTA_VIEW,
-    duration: 900
-  });
+  showMaltaView();
 });

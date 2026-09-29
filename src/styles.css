@@ -148,6 +148,12 @@ body {
   gap: 3px;
 }
 
+.church-search__option--bookmark strong::before {
+  margin-right: 7px;
+  color: #c88719;
+  content: "★";
+}
+
 .church-search__mass-details {
   display: flex;
   align-items: center;
@@ -531,21 +537,34 @@ body {
   line-height: 1.2;
 }
 
-.church-mass-bubble__map-link {
+.church-mass-bubble__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.church-mass-bubble__map-link,
+.church-mass-bubble__bookmark {
   display: inline-flex;
   min-height: 34px;
   flex: 0 0 auto;
   align-items: center;
-  align-self: flex-start;
-  margin-top: 2px;
   padding: 7px 11px;
+  border: 1px solid #cf142b;
   border-radius: 999px;
-  color: #fff;
-  background: #cf142b;
+  font: inherit;
   font-size: 0.72rem;
   font-weight: 800;
   line-height: 1;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.church-mass-bubble__map-link {
+  color: #fff;
+  background: #cf142b;
 }
 
 .church-mass-bubble__map-link::after {
@@ -558,7 +577,33 @@ body {
   background: #a5122a;
 }
 
-.church-mass-bubble__map-link:focus-visible {
+.church-mass-bubble__bookmark {
+  color: #a5122a;
+  background: #fff;
+}
+
+.church-mass-bubble__bookmark::before {
+  margin-right: 6px;
+  content: "☆";
+  font-size: 1rem;
+  line-height: 0;
+}
+
+.church-mass-bubble__bookmark:hover {
+  background: #fff3f5;
+}
+
+.church-mass-bubble__bookmark.is-bookmarked {
+  color: #fff;
+  background: #a5122a;
+}
+
+.church-mass-bubble__bookmark.is-bookmarked::before {
+  content: "★";
+}
+
+.church-mass-bubble__map-link:focus-visible,
+.church-mass-bubble__bookmark:focus-visible {
   outline: 3px solid rgb(207 20 43 / 30%);
   outline-offset: 2px;
 }

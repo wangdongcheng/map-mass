@@ -1,4 +1,8 @@
 import { Marker } from "maplibre-gl";
+import {
+  isChurchBookmarked,
+  toggleChurchBookmark
+} from "../data/church-bookmarks.js";
 import { getChurchPhotoUrl } from "../data/church-photos.js";
 import { getMassesInProgress } from "../data/current-mass.js";
 
@@ -196,7 +200,7 @@ function createChurchBubble(church) {
   const bubble = document.createElement("div");
   bubble.className = "church-mass-bubble";
   bubble.tabIndex = 0;
-  bubble.setAttribute("role", hasLanguageTabs ? "group" : "button");
+  bubble.setAttribute("role", "group");
   bubble.setAttribute(
     "aria-label",
     hasLanguageTabs
@@ -237,6 +241,33 @@ function createChurchBubble(church) {
   );
   googleMapsLink.addEventListener("click", (event) => event.stopPropagation());
 
+  const bookmarkButton = document.createElement("button");
+  bookmarkButton.className = "church-mass-bubble__bookmark";
+  bookmarkButton.type = "button";
+
+  const updateBookmarkButton = () => {
+    const isBookmarked = isChurchBookmarked(church.id);
+    bookmarkButton.classList.toggle("is-bookmarked", isBookmarked);
+    bookmarkButton.setAttribute("aria-pressed", String(isBookmarked));
+    bookmarkButton.textContent = isBookmarked
+      ? "Bookmarked"
+      : "Add to bookmarks";
+  };
+
+  updateBookmarkButton();
+  bookmarkButton.addEventListener("pointerdown", (event) =>
+    event.stopPropagation()
+  );
+  bookmarkButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleChurchBookmark(church.id);
+    updateBookmarkButton();
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "church-mass-bubble__actions";
+  actions.append(googleMapsLink, bookmarkButton);
+
   if (photoUrl) {
     const photo = document.createElement("img");
     photo.className = "church-mass-bubble__photo";
@@ -260,7 +291,7 @@ function createChurchBubble(church) {
     bubble.append(createMassTimes(church.massTimes), language);
   }
 
-  bubble.append(googleMapsLink);
+  bubble.append(actions);
 
   return bubble;
 }
@@ -413,13 +444,19 @@ export function addChurchMarker(map, church) {
     });
   };
 
-  const focusChurch = () => {
+  const focusChurch = ({ updateUrl = true } = {}) => {
     pinBubble();
     focusBubbleAtSide();
     zoomToChurch();
+
+    const churchPath = `/${church.id}`;
+
+    if (updateUrl && window.location.pathname !== churchPath) {
+      window.history.pushState({ churchId: church.id }, "", churchPath);
+    }
   };
 
-  bubble.addEventListener("click", focusChurch);
+  bubble.addEventListener("click", () => focusChurch());
   bubble.addEventListener("keydown", (event) => {
     if (event.target !== bubble) {
       return;
@@ -464,6 +501,7 @@ export function addChurchMarker(map, church) {
     churchId: church.id,
     marker,
     focus: focusChurch,
+    close: closeBubble,
     updateCurrentMassStatus
   };
 }
