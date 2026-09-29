@@ -26,6 +26,9 @@ export function createMaltaMap(container) {
     renderWorldCopies: false,
     dragRotate: false,
     pitchWithRotate: false,
+    scrollZoom: {
+      around: "center"
+    },
     canvasContextAttributes: {
       antialias: true
     }
