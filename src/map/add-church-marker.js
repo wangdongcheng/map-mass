@@ -210,7 +210,10 @@ function createChurchBubble(church) {
 
   const name = document.createElement("strong");
   name.className = "church-mass-bubble__name";
-  name.textContent = church.name;
+  name.textContent =
+    church.localName && church.localName !== church.name
+      ? `${church.name} (${church.localName})`
+      : church.name;
 
   const type = document.createElement("span");
   type.className = "church-mass-bubble__type";
