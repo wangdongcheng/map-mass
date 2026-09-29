@@ -1,5 +1,4 @@
 const MAX_RESULTS = 8;
-const SEARCH_ZOOM = 16.5;
 
 function normaliseSearchText(value) {
   return value
@@ -59,7 +58,7 @@ function getMatches(index, value) {
     .map(({ entry }) => entry.church);
 }
 
-export function initialiseChurchSearch(map, churches) {
+export function initialiseChurchSearch(map, churches, markerControllers) {
   const container = document.querySelector("#church-search");
   const input = document.querySelector("#church-search-input");
   const results = document.querySelector("#church-search-results");
@@ -96,12 +95,19 @@ export function initialiseChurchSearch(map, churches) {
     input.value = church.localName || church.name;
     closeResults();
 
+    const markerController = markerControllers.get(church.id);
+
+    if (markerController) {
+      markerController.focus();
+      return;
+    }
+
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
     map.flyTo({
       center: church.coordinates,
-      zoom: Math.max(map.getZoom(), SEARCH_ZOOM),
+      zoom: map.getMaxZoom(),
       duration: reducedMotion ? 0 : 1500,
       essential: !reducedMotion
     });

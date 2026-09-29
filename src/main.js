@@ -19,7 +19,10 @@ map.on("load", async () => {
   try {
     const churches = await churchesPromise;
     const churchMarkers = churches.map((church) => addChurchMarker(map, church));
-    initialiseChurchSearch(map, churches);
+    const churchMarkersById = new Map(
+      churchMarkers.map((controller) => [controller.churchId, controller])
+    );
+    initialiseChurchSearch(map, churches, churchMarkersById);
     const refreshCurrentMasses = () => {
       const now = new Date();
       churchMarkers.forEach(({ updateCurrentMassStatus }) =>
@@ -30,9 +33,9 @@ map.on("load", async () => {
     map.once("remove", () => window.clearInterval(currentMassTimer));
     loading.hidden = true;
 
-    import("./map/add-marija-regina-layer.js")
-      .then(({ addMarijaReginaLayer }) => addMarijaReginaLayer(map))
-      .catch((error) => console.error("Church model could not be loaded", error));
+    import("./map/add-church-models-layer.js")
+      .then(({ addChurchModelsLayer }) => addChurchModelsLayer(map, churches))
+      .catch((error) => console.error("Church models could not be loaded", error));
   } catch (error) {
     loadingCard.textContent = "Church data could not be loaded";
     console.error(error);

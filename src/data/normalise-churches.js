@@ -8,6 +8,11 @@ const DAYS = [
   "Sunday"
 ];
 
+export function formatChurchId(value) {
+  const id = String(value ?? "").trim();
+  return id ? id.padStart(4, "0") : "";
+}
+
 export function rowsToRecords(rows, firstColumnName) {
   const headerIndex = rows.findIndex((row) => row[0] === firstColumnName);
 
@@ -34,17 +39,17 @@ function createMassIndex(massRecords) {
   const massesByChurch = new Map();
 
   massRecords.forEach((record) => {
-    const churchNumber = String(record["Church No."] ?? "");
+    const churchId = formatChurchId(record["Church No."]);
 
-    if (!churchNumber || !record.Day || !record.Time) {
+    if (!churchId || !record.Day || !record.Time) {
       return;
     }
 
-    let masses = massesByChurch.get(churchNumber);
+    let masses = massesByChurch.get(churchId);
 
     if (!masses) {
       masses = new Map();
-      massesByChurch.set(churchNumber, masses);
+      massesByChurch.set(churchId, masses);
     }
 
     const mass = {
@@ -127,8 +132,8 @@ export function normaliseChurches(churchRecords, massRecords) {
   const massesByChurch = createMassIndex(massRecords);
 
   return churchRecords.flatMap((record) => {
-    const churchNumber = String(record["No."] ?? "");
-    const masses = massesByChurch.get(churchNumber);
+    const churchId = formatChurchId(record["No."]);
+    const masses = massesByChurch.get(churchId);
     const latitude = Number(record.Latitude);
     const longitude = Number(record.Longitude);
 
@@ -149,8 +154,8 @@ export function normaliseChurches(churchRecords, massRecords) {
 
     return [
       {
-        id: `mt-church-${churchNumber}`,
-        number: churchNumber,
+        id: churchId,
+        number: churchId,
         name: String(record.Church),
         localName: record["Local name"]
           ? String(record["Local name"])

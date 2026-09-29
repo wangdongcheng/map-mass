@@ -230,7 +230,8 @@ body {
 }
 
 .church-marker-anchor:hover,
-.church-marker-anchor:focus-within {
+.church-marker-anchor:focus-within,
+.church-marker-anchor.is-bubble-open {
   z-index: 20;
 }
 
@@ -329,12 +330,13 @@ body {
 }
 
 .church-mass-bubble {
+  box-sizing: border-box;
   position: absolute;
   left: 50%;
   bottom: var(--bubble-bottom, calc(100% - 1px));
   display: flex;
   flex-direction: column;
-  width: 238px;
+  width: min(340px, calc(100vw - 32px));
   max-height: min(460px, calc(100vh - 52px));
   padding: 14px 15px 16px;
   border: 1px solid rgb(207 20 43 / 28%);
@@ -385,9 +387,40 @@ body {
   transform: translateX(-50%) translateY(-3px) scale(1);
 }
 
+.church-marker-anchor.is-bubble-focused .church-mass-bubble,
+.church-marker-anchor.is-bubble-focused .church-mass-bubble:hover {
+  top: var(--bubble-focused-top);
+  bottom: auto;
+  left: var(--bubble-focused-left);
+  transform: scale(1);
+  transform-origin: 100% 50%;
+}
+
+.church-marker-anchor.is-bubble-focused .church-mass-bubble::after {
+  display: none;
+}
+
+.church-marker-anchor.is-bubble-focused .church-cross {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
 .church-mass-bubble:focus-visible {
   outline: 3px solid rgb(207 20 43 / 38%);
   outline-offset: 4px;
+}
+
+.church-mass-bubble__photo {
+  display: block;
+  width: calc(100% + 30px);
+  height: 132px;
+  flex: 0 0 auto;
+  margin: -14px -15px 12px;
+  border-radius: 17px 17px 8px 8px;
+  background: #eadfce;
+  object-fit: cover;
+  object-position: center;
 }
 
 .church-mass-bubble__eyebrow,
@@ -446,10 +479,11 @@ body {
 .church-language-tabs__list {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 10px;
   padding-bottom: 7px;
-  overflow-x: auto;
+  overflow-x: hidden;
   border-bottom: 1px solid rgb(207 20 43 / 16%);
   scrollbar-width: thin;
 }
@@ -498,7 +532,8 @@ body {
 .mass-time-table-wrap {
   min-height: 0;
   margin: 0 0 11px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-size: 0.73rem;
   line-height: 1.3;
   scrollbar-color: rgb(207 20 43 / 45%) transparent;
@@ -509,14 +544,15 @@ body {
   width: 100%;
   border-spacing: 0;
   border-collapse: separate;
+  table-layout: fixed;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
 .mass-time-table th,
 .mass-time-table td {
-  min-width: 55px;
-  padding: 5px 6px;
+  min-width: 0;
+  padding: 5px 4px;
   border-right: 1px solid rgb(207 20 43 / 12%);
   border-bottom: 1px solid rgb(207 20 43 / 12%);
 }
@@ -566,6 +602,7 @@ body {
   color: #925261;
   font-size: 0.64rem;
   font-weight: 600;
+  white-space: normal;
 }
 
 .mass-time-entry.is-current-mass small {

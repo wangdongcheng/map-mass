@@ -1,4 +1,5 @@
 import { Marker } from "maplibre-gl";
+import { getChurchPhotoUrl } from "../data/church-photos.js";
 import { getMassesInProgress } from "../data/current-mass.js";
 
 const SHORT_DAY_NAMES = {
@@ -163,6 +164,7 @@ function createLanguageTabs(church) {
 
 function createChurchBubble(church) {
   const hasLanguageTabs = church.languages.length > 1;
+  const photoUrl = getChurchPhotoUrl(church.id);
   const bubble = document.createElement("div");
   bubble.className = "church-mass-bubble";
   bubble.tabIndex = 0;
@@ -189,6 +191,17 @@ function createChurchBubble(church) {
   const language = document.createElement("span");
   language.className = "church-mass-bubble__language";
   language.textContent = church.languages.join(" · ");
+
+  if (photoUrl) {
+    const photo = document.createElement("img");
+    photo.className = "church-mass-bubble__photo";
+    photo.src = photoUrl;
+    photo.alt = `${church.name}, ${church.locality}`;
+    photo.loading = "lazy";
+    photo.decoding = "async";
+    photo.draggable = false;
+    bubble.append(photo);
+  }
 
   bubble.append(eyebrow, name);
 
@@ -225,14 +238,85 @@ export function addChurchMarker(map, church) {
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
   let autoDismissTimer;
+  let positionFrame;
+  let isFocusedAtSide = false;
   let isPinned = false;
+
+  const positionFocusedBubble = () => {
+    if (!markerAnchor.classList.contains("is-bubble-focused")) {
+      return;
+    }
+
+    const mapBounds = map.getContainer().getBoundingClientRect();
+    const anchorBounds = markerAnchor.getBoundingClientRect();
+    const bubbleBounds = bubble.getBoundingClientRect();
+    const edgeGap = mapBounds.width < 600 ? 12 : 24;
+    const targetLeft = Math.max(
+      mapBounds.left + edgeGap,
+      mapBounds.right - bubbleBounds.width - edgeGap
+    );
+    const targetTop = Math.max(
+      mapBounds.top + edgeGap,
+      mapBounds.top + (mapBounds.height - bubbleBounds.height) / 2
+    );
+
+    bubble.style.setProperty(
+      "--bubble-focused-left",
+      `${targetLeft - anchorBounds.left}px`
+    );
+    bubble.style.setProperty(
+      "--bubble-focused-top",
+      `${targetTop - anchorBounds.top}px`
+    );
+  };
+
+  const scheduleFocusedBubblePosition = () => {
+    if (positionFrame) {
+      return;
+    }
+
+    positionFrame = window.requestAnimationFrame(() => {
+      positionFrame = undefined;
+      positionFocusedBubble();
+    });
+  };
+
+  const stopFocusedBubblePositioning = () => {
+    if (!isFocusedAtSide) {
+      return;
+    }
+
+    map.off("move", scheduleFocusedBubblePosition);
+    map.off("resize", scheduleFocusedBubblePosition);
+    window.cancelAnimationFrame(positionFrame);
+    positionFrame = undefined;
+    isFocusedAtSide = false;
+  };
+
+  const focusBubbleAtSide = () => {
+    markerAnchor.classList.add("is-bubble-focused");
+
+    if (isFocusedAtSide) {
+      scheduleFocusedBubblePosition();
+      return;
+    }
+
+    isFocusedAtSide = true;
+    map.on("move", scheduleFocusedBubblePosition);
+    map.on("resize", scheduleFocusedBubblePosition);
+    scheduleFocusedBubblePosition();
+  };
 
   const closeBubble = () => {
     window.clearTimeout(hoverTimer);
     window.clearTimeout(autoDismissTimer);
+    stopFocusedBubblePositioning();
     markerAnchor.classList.remove("is-bubble-open");
+    markerAnchor.classList.remove("is-bubble-focused");
     bubble.style.removeProperty("--bubble-pointer-x");
     bubble.style.removeProperty("--bubble-bottom");
+    bubble.style.removeProperty("--bubble-focused-left");
+    bubble.style.removeProperty("--bubble-focused-top");
     isPinned = false;
 
     if (markerAnchor.contains(document.activeElement)) {
@@ -337,10 +421,13 @@ export function addChurchMarker(map, church) {
     });
   };
 
-  bubble.addEventListener("click", () => {
+  const focusChurch = () => {
     pinBubble();
+    focusBubbleAtSide();
     zoomToChurch();
-  });
+  };
+
+  bubble.addEventListener("click", focusChurch);
   bubble.addEventListener("keydown", (event) => {
     if (event.target !== bubble) {
       return;
@@ -348,8 +435,7 @@ export function addChurchMarker(map, church) {
 
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      pinBubble();
-      zoomToChurch();
+      focusChurch();
     }
   });
 
@@ -382,5 +468,10 @@ export function addChurchMarker(map, church) {
     .setLngLat(church.coordinates)
     .addTo(map);
 
-  return { marker, updateCurrentMassStatus };
+  return {
+    churchId: church.id,
+    marker,
+    focus: focusChurch,
+    updateCurrentMassStatus
+  };
 }
