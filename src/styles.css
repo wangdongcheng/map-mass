@@ -276,6 +276,45 @@ body {
   font-weight: 700;
 }
 
+.powered-by {
+  position: fixed;
+  z-index: 10;
+  right: 10px;
+  bottom: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border: 1px solid rgb(69 78 73 / 12%);
+  border-radius: 9px;
+  color: #52666d;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 4px 14px rgb(23 64 78 / 14%);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.powered-by img {
+  display: block;
+  width: 92px;
+  height: auto;
+}
+
+.powered-by:hover {
+  background: #fff;
+  box-shadow: 0 6px 18px rgb(23 64 78 / 20%);
+}
+
+.powered-by:focus-visible {
+  outline: 3px solid rgb(27 111 138 / 30%);
+  outline-offset: 2px;
+}
+
 .church-marker-anchor {
   position: absolute;
   width: 24px;
