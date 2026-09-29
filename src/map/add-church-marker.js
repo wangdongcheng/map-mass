@@ -11,6 +11,10 @@ const SHORT_DAY_NAMES = {
   Sunday: "Sun"
 };
 
+const BUBBLE_HOVER_DELAY = 2000;
+const BUBBLE_POINTER_SIZE = 18;
+const BUBBLE_POINTER_GAP = 2;
+
 function formatDays(dayNames) {
   if (dayNames.length === 1) {
     return SHORT_DAY_NAMES[dayNames[0]];
@@ -216,9 +220,22 @@ export function addChurchMarker(map, church) {
   currentMass.textContent = "🔔";
 
   const stopMapInteraction = (event) => event.stopPropagation();
+  let hoverTimer;
+
   cross.addEventListener("pointerdown", stopMapInteraction);
   bubble.addEventListener("pointerdown", stopMapInteraction);
   cross.addEventListener("click", () => bubble.focus());
+
+  markerAnchor.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "mouse") {
+      return;
+    }
+
+    window.clearTimeout(hoverTimer);
+    hoverTimer = window.setTimeout(() => {
+      markerAnchor.classList.add("is-bubble-open");
+    }, BUBBLE_HOVER_DELAY);
+  });
 
   markerAnchor.addEventListener("pointermove", (event) => {
     if (bubble.contains(event.target)) {
@@ -229,16 +246,25 @@ export function addChurchMarker(map, church) {
     const edgeInset = 20;
     const bubbleLeft =
       anchorBounds.left + anchorBounds.width / 2 - bubble.offsetWidth / 2;
+    const pointerBottom =
+      anchorBounds.bottom -
+      event.clientY +
+      BUBBLE_POINTER_GAP +
+      BUBBLE_POINTER_SIZE / Math.sqrt(2);
     const pointerX = Math.min(
       bubble.offsetWidth - edgeInset,
       Math.max(edgeInset, event.clientX - bubbleLeft)
     );
 
     bubble.style.setProperty("--bubble-pointer-x", `${pointerX}px`);
+    bubble.style.setProperty("--bubble-bottom", `${pointerBottom}px`);
   });
 
   markerAnchor.addEventListener("pointerleave", () => {
+    window.clearTimeout(hoverTimer);
+    markerAnchor.classList.remove("is-bubble-open");
     bubble.style.removeProperty("--bubble-pointer-x");
+    bubble.style.removeProperty("--bubble-bottom");
   });
 
   const zoomToChurch = () => {
