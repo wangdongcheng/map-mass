@@ -359,7 +359,7 @@ body {
 
 .church-mass-bubble::after {
   position: absolute;
-  left: 50%;
+  left: var(--bubble-pointer-x, 50%);
   bottom: -9px;
   width: 18px;
   height: 18px;

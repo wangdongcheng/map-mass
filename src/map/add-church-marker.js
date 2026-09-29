@@ -220,6 +220,27 @@ export function addChurchMarker(map, church) {
   bubble.addEventListener("pointerdown", stopMapInteraction);
   cross.addEventListener("click", () => bubble.focus());
 
+  markerAnchor.addEventListener("pointermove", (event) => {
+    if (bubble.contains(event.target)) {
+      return;
+    }
+
+    const anchorBounds = markerAnchor.getBoundingClientRect();
+    const edgeInset = 20;
+    const bubbleLeft =
+      anchorBounds.left + anchorBounds.width / 2 - bubble.offsetWidth / 2;
+    const pointerX = Math.min(
+      bubble.offsetWidth - edgeInset,
+      Math.max(edgeInset, event.clientX - bubbleLeft)
+    );
+
+    bubble.style.setProperty("--bubble-pointer-x", `${pointerX}px`);
+  });
+
+  markerAnchor.addEventListener("pointerleave", () => {
+    bubble.style.removeProperty("--bubble-pointer-x");
+  });
+
   const zoomToChurch = () => {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
