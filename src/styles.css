@@ -134,6 +134,50 @@ body {
   line-height: 1.3;
 }
 
+.church-search__heading {
+  margin: 0;
+  padding: 7px 11px 5px;
+  color: #a5122a;
+  font-size: 0.69rem;
+  font-weight: 850;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+}
+
+.church-search__option--mass {
+  gap: 3px;
+}
+
+.church-search__mass-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 1px;
+}
+
+.church-search__mass-language {
+  min-width: 0;
+  overflow: hidden;
+  color: #a5122a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.church-search__mass-time {
+  flex: 0 0 auto;
+  color: #690f20;
+  font-size: 0.73rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.church-search__option--mass .church-search__address {
+  margin-top: 0;
+}
+
 .church-search__alternate {
   margin-top: 1px;
   color: #52666d;

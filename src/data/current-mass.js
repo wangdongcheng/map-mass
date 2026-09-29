@@ -1,4 +1,13 @@
 const MASS_DURATION_MINUTES = 60;
+const DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday"
+];
 
 const MALTA_TIME_FORMATTER = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/Malta",
@@ -62,4 +71,41 @@ export function getMassesInProgress(masses, date = new Date()) {
 
 export function isMassInProgress(masses, date = new Date()) {
   return getMassesInProgress(masses, date).masses.length > 0;
+}
+
+export function getUpcomingMasses(churches, date = new Date(), limit = 8) {
+  const now = getMaltaDayAndMinute(date);
+  const todayIndex = DAYS.indexOf(now.day);
+
+  if (todayIndex === -1 || limit <= 0) {
+    return [];
+  }
+
+  return churches
+    .flatMap((church) =>
+      church.masses.flatMap((mass) => {
+        const massDayIndex = DAYS.indexOf(mass.day);
+        const startMinute = parseTime(mass.time);
+
+        if (massDayIndex === -1 || startMinute === null) {
+          return [];
+        }
+
+        let dayOffset = (massDayIndex - todayIndex + DAYS.length) % DAYS.length;
+
+        if (dayOffset === 0 && startMinute < now.minute) {
+          dayOffset = DAYS.length;
+        }
+
+        return [{ church, mass, dayOffset, startMinute }];
+      })
+    )
+    .sort(
+      (a, b) =>
+        a.dayOffset - b.dayOffset ||
+        a.startMinute - b.startMinute ||
+        a.church.name.localeCompare(b.church.name) ||
+        a.mass.language.localeCompare(b.mass.language)
+    )
+    .slice(0, limit);
 }
