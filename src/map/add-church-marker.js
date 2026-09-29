@@ -18,6 +18,33 @@ const BUBBLE_POINTER_SIZE = 18;
 const BUBBLE_POINTER_GAP = 2;
 
 let activeBubbleController = null;
+const bubbleDismissHandlers = new WeakMap();
+
+function ensureBubbleDismissHandler(map) {
+  const container = map.getContainer();
+
+  if (bubbleDismissHandlers.has(container)) {
+    return;
+  }
+
+  const dismissBubble = (event) => {
+    if (
+      event.target instanceof Element &&
+      event.target.closest(".church-mass-bubble, .church-cross")
+    ) {
+      return;
+    }
+
+    activeBubbleController?.close();
+  };
+
+  bubbleDismissHandlers.set(container, dismissBubble);
+  container.addEventListener("click", dismissBubble);
+  map.once("remove", () => {
+    container.removeEventListener("click", dismissBubble);
+    bubbleDismissHandlers.delete(container);
+  });
+}
 
 function formatDays(dayNames) {
   if (dayNames.length === 1) {
@@ -219,6 +246,8 @@ function createChurchBubble(church) {
 }
 
 export function addChurchMarker(map, church) {
+  ensureBubbleDismissHandler(map);
+
   const bubble = createChurchBubble(church);
   const markerAnchor = document.createElement("div");
   markerAnchor.className = "church-marker-anchor";
@@ -238,85 +267,23 @@ export function addChurchMarker(map, church) {
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
   let autoDismissTimer;
-  let positionFrame;
-  let isFocusedAtSide = false;
   let isPinned = false;
-
-  const positionFocusedBubble = () => {
-    if (!markerAnchor.classList.contains("is-bubble-focused")) {
-      return;
-    }
-
-    const mapBounds = map.getContainer().getBoundingClientRect();
-    const anchorBounds = markerAnchor.getBoundingClientRect();
-    const bubbleBounds = bubble.getBoundingClientRect();
-    const edgeGap = mapBounds.width < 600 ? 12 : 24;
-    const targetLeft = Math.max(
-      mapBounds.left + edgeGap,
-      mapBounds.right - bubbleBounds.width - edgeGap
-    );
-    const targetTop = Math.max(
-      mapBounds.top + edgeGap,
-      mapBounds.top + (mapBounds.height - bubbleBounds.height) / 2
-    );
-
-    bubble.style.setProperty(
-      "--bubble-focused-left",
-      `${targetLeft - anchorBounds.left}px`
-    );
-    bubble.style.setProperty(
-      "--bubble-focused-top",
-      `${targetTop - anchorBounds.top}px`
-    );
-  };
-
-  const scheduleFocusedBubblePosition = () => {
-    if (positionFrame) {
-      return;
-    }
-
-    positionFrame = window.requestAnimationFrame(() => {
-      positionFrame = undefined;
-      positionFocusedBubble();
-    });
-  };
-
-  const stopFocusedBubblePositioning = () => {
-    if (!isFocusedAtSide) {
-      return;
-    }
-
-    map.off("move", scheduleFocusedBubblePosition);
-    map.off("resize", scheduleFocusedBubblePosition);
-    window.cancelAnimationFrame(positionFrame);
-    positionFrame = undefined;
-    isFocusedAtSide = false;
-  };
 
   const focusBubbleAtSide = () => {
     markerAnchor.classList.add("is-bubble-focused");
-
-    if (isFocusedAtSide) {
-      scheduleFocusedBubblePosition();
-      return;
-    }
-
-    isFocusedAtSide = true;
-    map.on("move", scheduleFocusedBubblePosition);
-    map.on("resize", scheduleFocusedBubblePosition);
-    scheduleFocusedBubblePosition();
+    bubble.classList.add("is-bubble-focused");
+    map.getContainer().append(bubble);
   };
 
   const closeBubble = () => {
     window.clearTimeout(hoverTimer);
     window.clearTimeout(autoDismissTimer);
-    stopFocusedBubblePositioning();
+    bubble.classList.remove("is-bubble-focused");
+    markerAnchor.append(bubble);
     markerAnchor.classList.remove("is-bubble-open");
     markerAnchor.classList.remove("is-bubble-focused");
     bubble.style.removeProperty("--bubble-pointer-x");
     bubble.style.removeProperty("--bubble-bottom");
-    bubble.style.removeProperty("--bubble-focused-left");
-    bubble.style.removeProperty("--bubble-focused-top");
     isPinned = false;
 
     if (markerAnchor.contains(document.activeElement)) {
@@ -357,7 +324,7 @@ export function addChurchMarker(map, church) {
   bubble.addEventListener("pointerdown", pinBubble, { capture: true });
   bubble.addEventListener("pointerdown", stopMapInteraction);
   cross.addEventListener("focus", openBubble);
-  cross.addEventListener("click", () => bubble.focus());
+  cross.addEventListener("click", openBubble);
 
   markerAnchor.addEventListener("pointerenter", (event) => {
     if (event.pointerType !== "mouse") {
