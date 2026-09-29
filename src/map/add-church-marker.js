@@ -12,9 +12,11 @@ const SHORT_DAY_NAMES = {
 };
 
 const BUBBLE_HOVER_DELAY = 1000;
-const BUBBLE_EXIT_GRACE = 400;
+const BUBBLE_VISIBLE_DURATION = 5000;
 const BUBBLE_POINTER_SIZE = 18;
 const BUBBLE_POINTER_GAP = 2;
+
+let activeBubbleController = null;
 
 function formatDays(dayNames) {
   if (dayNames.length === 1) {
@@ -222,27 +224,61 @@ export function addChurchMarker(map, church) {
 
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
-  let closeTimer;
+  let autoDismissTimer;
+  let isPinned = false;
 
   const closeBubble = () => {
+    window.clearTimeout(hoverTimer);
+    window.clearTimeout(autoDismissTimer);
     markerAnchor.classList.remove("is-bubble-open");
     bubble.style.removeProperty("--bubble-pointer-x");
     bubble.style.removeProperty("--bubble-bottom");
+    isPinned = false;
+
+    if (markerAnchor.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+
+    if (activeBubbleController === bubbleController) {
+      activeBubbleController = null;
+    }
+  };
+
+  const bubbleController = { close: closeBubble };
+
+  const openBubble = () => {
+    if (activeBubbleController !== bubbleController) {
+      activeBubbleController?.close();
+      activeBubbleController = bubbleController;
+    }
+
+    markerAnchor.classList.add("is-bubble-open");
+    window.clearTimeout(autoDismissTimer);
+
+    if (!isPinned) {
+      autoDismissTimer = window.setTimeout(
+        closeBubble,
+        BUBBLE_VISIBLE_DURATION
+      );
+    }
+  };
+
+  const pinBubble = () => {
+    isPinned = true;
+    openBubble();
+    window.clearTimeout(autoDismissTimer);
   };
 
   cross.addEventListener("pointerdown", stopMapInteraction);
+  bubble.addEventListener("pointerdown", pinBubble, { capture: true });
   bubble.addEventListener("pointerdown", stopMapInteraction);
+  cross.addEventListener("focus", openBubble);
   cross.addEventListener("click", () => bubble.focus());
-  bubble.addEventListener("pointerenter", () => {
-    window.clearTimeout(closeTimer);
-  });
 
   markerAnchor.addEventListener("pointerenter", (event) => {
     if (event.pointerType !== "mouse") {
       return;
     }
-
-    window.clearTimeout(closeTimer);
 
     if (markerAnchor.classList.contains("is-bubble-open")) {
       return;
@@ -250,12 +286,15 @@ export function addChurchMarker(map, church) {
 
     window.clearTimeout(hoverTimer);
     hoverTimer = window.setTimeout(() => {
-      markerAnchor.classList.add("is-bubble-open");
+      openBubble();
     }, BUBBLE_HOVER_DELAY);
   });
 
   markerAnchor.addEventListener("pointermove", (event) => {
-    if (bubble.contains(event.target)) {
+    if (
+      markerAnchor.classList.contains("is-bubble-open") ||
+      bubble.contains(event.target)
+    ) {
       return;
     }
 
@@ -282,11 +321,7 @@ export function addChurchMarker(map, church) {
 
     if (!markerAnchor.classList.contains("is-bubble-open")) {
       closeBubble();
-      return;
     }
-
-    window.clearTimeout(closeTimer);
-    closeTimer = window.setTimeout(closeBubble, BUBBLE_EXIT_GRACE);
   });
 
   const zoomToChurch = () => {
@@ -302,7 +337,10 @@ export function addChurchMarker(map, church) {
     });
   };
 
-  bubble.addEventListener("click", zoomToChurch);
+  bubble.addEventListener("click", () => {
+    pinBubble();
+    zoomToChurch();
+  });
   bubble.addEventListener("keydown", (event) => {
     if (event.target !== bubble) {
       return;
@@ -310,6 +348,7 @@ export function addChurchMarker(map, church) {
 
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
+      pinBubble();
       zoomToChurch();
     }
   });
