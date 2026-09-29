@@ -11,8 +11,8 @@ export const MALTA_VIEW = {
 };
 
 const MALTA_BOUNDS = [
-  [13.95, 35.6],
-  [14.82, 36.34]
+  [13.7, 35.4],
+  [15.07, 36.54]
 ];
 
 export function createMaltaMap(container) {
