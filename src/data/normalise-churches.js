@@ -156,6 +156,7 @@ export function normaliseChurches(churchRecords, massRecords) {
           ? String(record["Local name"])
           : "",
         locality: record.Locality ? String(record.Locality) : "",
+        address: record.Address ? String(record.Address) : "",
         type: record.Type ? String(record.Type) : "",
         coordinates: [longitude, latitude],
         masses: [...masses.values()],

@@ -15,13 +15,35 @@
   <body>
     <main id="map" aria-label="Interactive 2.5D map of Malta"></main>
 
-    <header class="map-header">
-      <div class="island-mark" aria-hidden="true">MT</div>
-      <div>
-        <h1 class="map-title">Malta 2.5D Map</h1>
-        <p class="map-note">Zoom in to raise the buildings</p>
+    <div class="church-search" id="church-search">
+      <label class="sr-only" for="church-search-input">
+        Search churches by name or address
+      </label>
+      <div class="church-search__field">
+        <svg class="church-search__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z" />
+        </svg>
+        <input
+          id="church-search-input"
+          type="search"
+          placeholder="Search church or address"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="church-search-results"
+          aria-expanded="false"
+          disabled
+        />
       </div>
-    </header>
+      <div
+        class="church-search__results"
+        id="church-search-results"
+        role="listbox"
+        aria-label="Church search results"
+        hidden
+      ></div>
+    </div>
 
     <button class="reset-view" id="reset-view" type="button">
       Whole island

@@ -4,6 +4,7 @@ import { loadChurches } from "./data/load-churches.js";
 import { addBuildingLayer } from "./map/add-building-layer.js";
 import { addChurchMarker } from "./map/add-church-marker.js";
 import { createMaltaMap, MALTA_VIEW } from "./map/create-map.js";
+import { initialiseChurchSearch } from "./ui/church-search.js";
 
 const loading = document.querySelector("#loading");
 const loadingCard = document.querySelector(".loading-card");
@@ -18,6 +19,7 @@ map.on("load", async () => {
   try {
     const churches = await churchesPromise;
     const churchMarkers = churches.map((church) => addChurchMarker(map, church));
+    initialiseChurchSearch(map, churches);
     const refreshCurrentMasses = () => {
       const now = new Date();
       churchMarkers.forEach(({ updateCurrentMassStatus }) =>
