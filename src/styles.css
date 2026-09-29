@@ -170,24 +170,24 @@ body {
 .reset-view {
   position: fixed;
   z-index: 10;
-  right: 14px;
-  bottom: 28px;
-  min-height: 42px;
-  padding: 0 15px;
-  border: 1px solid rgb(70 80 76 / 18%);
-  border-radius: 13px;
-  color: #24343a;
-  background: rgb(255 252 244 / 92%);
-  box-shadow: 0 8px 22px rgb(23 64 78 / 16%);
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
+  top: 82px;
+  right: 16px;
+  display: grid;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  color: #333;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 10%);
+  font: 20px/1 Arial, Helvetica, sans-serif;
   cursor: pointer;
-  backdrop-filter: blur(12px);
 }
 
 .reset-view:hover {
-  background: #fffdf8;
+  background: #f2f2f2;
 }
 
 .reset-view:focus-visible {
