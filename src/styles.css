@@ -279,7 +279,7 @@ body {
 .powered-by {
   position: fixed;
   z-index: 10;
-  right: 10px;
+  left: 10px;
   bottom: 28px;
   display: inline-flex;
   align-items: center;
