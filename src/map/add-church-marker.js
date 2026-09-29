@@ -282,7 +282,12 @@ export function addChurchMarker(map, church) {
   currentMass.setAttribute("role", "status");
   currentMass.setAttribute("aria-label", "Mass in progress");
   currentMass.title = "Mass in progress";
-  currentMass.textContent = "🔔";
+
+  const currentMassIcon = document.createElement("img");
+  currentMassIcon.src = "/favicon.svg";
+  currentMassIcon.alt = "";
+  currentMassIcon.setAttribute("aria-hidden", "true");
+  currentMass.append(currentMassIcon);
 
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
