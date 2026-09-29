@@ -192,6 +192,7 @@ function createLanguageTabs(church) {
 function createChurchBubble(church) {
   const hasLanguageTabs = church.languages.length > 1;
   const photoUrl = getChurchPhotoUrl(church.id);
+  const [longitude, latitude] = church.coordinates;
   const bubble = document.createElement("div");
   bubble.className = "church-mass-bubble";
   bubble.tabIndex = 0;
@@ -219,6 +220,20 @@ function createChurchBubble(church) {
   language.className = "church-mass-bubble__language";
   language.textContent = church.languages.join(" · ");
 
+  const googleMapsLink = document.createElement("a");
+  googleMapsLink.className = "church-mass-bubble__map-link";
+  googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${latitude},${longitude}`
+  )}`;
+  googleMapsLink.target = "_blank";
+  googleMapsLink.rel = "noopener noreferrer";
+  googleMapsLink.textContent = "View in Google Maps";
+  googleMapsLink.setAttribute(
+    "aria-label",
+    `View ${church.name} in Google Maps (opens in a new tab)`
+  );
+  googleMapsLink.addEventListener("click", (event) => event.stopPropagation());
+
   if (photoUrl) {
     const photo = document.createElement("img");
     photo.className = "church-mass-bubble__photo";
@@ -241,6 +256,8 @@ function createChurchBubble(church) {
   } else {
     bubble.append(createMassTimes(church.massTimes), language);
   }
+
+  bubble.append(googleMapsLink);
 
   return bubble;
 }
