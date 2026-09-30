@@ -482,7 +482,9 @@ export function addChurchMarker(map, church) {
   const updateCurrentMassStatus = (date = new Date()) => {
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
-    currentMass.hidden = activeTimes.size === 0;
+    const hasCurrentMass = activeTimes.size > 0;
+    currentMass.hidden = !hasCurrentMass;
+    markerAnchor.classList.toggle("has-current-mass", hasCurrentMass);
 
     bubble.querySelectorAll(".mass-time-entry").forEach((entry) => {
       const isCurrent =

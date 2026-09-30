@@ -417,6 +417,10 @@ body {
   z-index: 20;
 }
 
+.church-marker-anchor.has-current-mass {
+  z-index: 30;
+}
+
 .church-cross {
   position: absolute;
   inset: 0;
@@ -499,6 +503,11 @@ body {
 
 .current-mass-indicator[hidden] {
   display: none;
+}
+
+.church-marker-anchor.has-current-mass .church-cross {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .current-mass-indicator img {
