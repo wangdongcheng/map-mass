@@ -145,7 +145,9 @@ body {
 }
 
 .church-search__option--mass {
-  gap: 3px;
+  gap: 5px;
+  padding: 9px 11px 9px 25px;
+  border-radius: 9px;
 }
 
 .church-search__option--bookmark strong::before {
@@ -182,6 +184,93 @@ body {
 
 .church-search__option--mass .church-search__address {
   margin-top: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.church-search__time-group + .church-search__time-group {
+  border-top: 1px solid rgb(69 78 73 / 9%);
+}
+
+.church-search__time-toggle {
+  display: grid;
+  width: 100%;
+  min-height: 47px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 10px;
+  grid-template-columns: minmax(64px, auto) minmax(58px, auto) 1fr 18px;
+  align-items: center;
+  gap: 8px;
+  color: #26383e;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.church-search__time-toggle:hover,
+.church-search__time-toggle:focus-visible,
+.church-search__time-toggle[aria-expanded="true"] {
+  background: #f8eee7;
+}
+
+.church-search__time-toggle:focus-visible {
+  outline: 2px solid rgb(27 111 138 / 45%);
+  outline-offset: -2px;
+}
+
+.church-search__time-day {
+  color: #856047;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.church-search__time-value {
+  color: #8f1026;
+  font-size: 1rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.church-search__time-count {
+  color: #607277;
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.church-search__time-chevron {
+  color: #a5122a;
+  font-size: 1.35rem;
+  line-height: 1;
+  text-align: center;
+  transition: transform 160ms ease;
+}
+
+.church-search__time-toggle[aria-expanded="true"]
+  .church-search__time-chevron {
+  transform: rotate(90deg);
+}
+
+.church-search__time-panel {
+  position: relative;
+  max-height: 160px;
+  padding: 2px 0 5px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.church-search__time-panel::before {
+  position: absolute;
+  top: 4px;
+  bottom: 8px;
+  left: 16px;
+  width: 2px;
+  border-radius: 2px;
+  background: rgb(165 18 42 / 18%);
+  content: "";
+  pointer-events: none;
 }
 
 .church-search__alternate {
