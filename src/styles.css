@@ -447,15 +447,20 @@ body {
   font-weight: 700;
 }
 
-.powered-by {
+.map-footer-links {
   position: fixed;
   z-index: 10;
   left: 10px;
   bottom: 28px;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.powered-by,
+.github-link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 8px;
   border: 1px solid rgb(69 78 73 / 12%);
   border-radius: 9px;
   color: #52666d;
@@ -466,8 +471,13 @@ body {
   letter-spacing: 0.08em;
   line-height: 1;
   text-decoration: none;
-  text-transform: uppercase;
   backdrop-filter: blur(10px);
+}
+
+.powered-by {
+  gap: 7px;
+  padding: 5px 8px;
+  text-transform: uppercase;
 }
 
 .powered-by img {
@@ -476,12 +486,28 @@ body {
   height: auto;
 }
 
-.powered-by:hover {
+.github-link {
+  justify-content: center;
+  width: 34px;
+  padding: 5px;
+  color: #24292f;
+}
+
+.github-link svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: currentcolor;
+}
+
+.powered-by:hover,
+.github-link:hover {
   background: #fff;
   box-shadow: 0 6px 18px rgb(23 64 78 / 20%);
 }
 
-.powered-by:focus-visible {
+.powered-by:focus-visible,
+.github-link:focus-visible {
   outline: 3px solid rgb(27 111 138 / 30%);
   outline-offset: 2px;
 }
