@@ -1,8 +1,15 @@
 {
   "name": "map-mass",
   "compatibility_date": "2026-09-30",
+  "routes": [
+    {
+      "pattern": "mass.catholic.mt",
+      "custom_domain": true
+    }
+  ],
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
   },
   "observability": {
     "logs": {
