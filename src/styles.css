@@ -505,11 +505,6 @@ body {
   display: none;
 }
 
-.church-marker-anchor.has-current-mass .church-cross {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .current-mass-indicator img {
   display: block;
   width: 22px;
