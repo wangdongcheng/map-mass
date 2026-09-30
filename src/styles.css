@@ -380,6 +380,7 @@ body {
   display: grid;
   width: 34px;
   height: 29px;
+  padding: 0;
   place-items: center;
   border: 1px solid rgb(207 20 43 / 34%);
   border-radius: 10px;
@@ -511,6 +512,17 @@ body {
   opacity: 0.7;
   pointer-events: auto;
   transform: scale(1);
+}
+
+.church-marker-anchor.is-bubble-focused .current-mass-indicator {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.church-marker-anchor .current-mass-indicator:focus-visible {
+  opacity: 1;
+  outline: 3px solid rgb(207 20 43 / 38%);
+  outline-offset: 3px;
 }
 
 .church-mass-bubble:focus-visible {

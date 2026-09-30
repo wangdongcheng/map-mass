@@ -34,7 +34,9 @@ function ensureBubbleDismissHandler(map) {
   const dismissBubble = (event) => {
     if (
       event.target instanceof Element &&
-      event.target.closest(".church-mass-bubble, .church-cross")
+      event.target.closest(
+        ".church-mass-bubble, .church-cross, .current-mass-indicator"
+      )
     ) {
       return;
     }
@@ -308,11 +310,14 @@ export function addChurchMarker(map, church) {
   cross.type = "button";
   cross.setAttribute("aria-label", `Show Mass times for ${church.name}`);
 
-  const currentMass = document.createElement("span");
+  const currentMass = document.createElement("button");
   currentMass.className = "current-mass-indicator";
-  currentMass.setAttribute("role", "status");
-  currentMass.setAttribute("aria-label", "Mass in progress");
-  currentMass.title = "Mass in progress";
+  currentMass.type = "button";
+  currentMass.setAttribute(
+    "aria-label",
+    `Mass in progress at ${church.name}. Zoom to church.`
+  );
+  currentMass.title = "Mass in progress — zoom to church";
 
   const currentMassIcon = document.createElement("img");
   currentMassIcon.src = "/favicon.svg";
@@ -377,6 +382,7 @@ export function addChurchMarker(map, church) {
   };
 
   cross.addEventListener("pointerdown", stopMapInteraction);
+  currentMass.addEventListener("pointerdown", stopMapInteraction);
   bubble.addEventListener("pointerdown", pinBubble, { capture: true });
   bubble.addEventListener("pointerdown", stopMapInteraction);
   cross.addEventListener("focus", openBubble);
@@ -455,6 +461,11 @@ export function addChurchMarker(map, church) {
       window.history.pushState({ churchId: church.id }, "", churchPath);
     }
   };
+
+  currentMass.addEventListener("click", (event) => {
+    event.stopPropagation();
+    focusChurch();
+  });
 
   bubble.addEventListener("click", () => focusChurch());
   bubble.addEventListener("keydown", (event) => {
