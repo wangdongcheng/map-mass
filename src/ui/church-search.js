@@ -83,6 +83,15 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     input.removeAttribute("aria-activedescendant");
   };
 
+  const closeChurchBubbles = () => {
+    markerControllers.forEach(({ close }) => close());
+  };
+
+  const activateSearch = () => {
+    closeChurchBubbles();
+    renderResults();
+  };
+
   const setActiveIndex = (nextIndex) => {
     if (!matches.length) return;
 
@@ -364,8 +373,9 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
 
   input.disabled = false;
   input.addEventListener("input", renderResults);
-  input.addEventListener("focus", renderResults);
+  input.addEventListener("focus", activateSearch);
   input.addEventListener("click", () => {
+    closeChurchBubbles();
     if (results.hidden) renderResults();
   });
   input.addEventListener("keydown", (event) => {

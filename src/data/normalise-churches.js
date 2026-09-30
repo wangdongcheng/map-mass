@@ -133,13 +133,12 @@ export function normaliseChurches(churchRecords, massRecords) {
 
   return churchRecords.flatMap((record) => {
     const churchId = formatChurchId(record["No."]);
-    const masses = massesByChurch.get(churchId);
+    const masses = massesByChurch.get(churchId) ?? new Map();
     const latitude = Number(record.Latitude);
     const longitude = Number(record.Longitude);
 
     if (
-      record["Schedule status"] !== "Listed" ||
-      !masses?.size ||
+      !churchId ||
       !Number.isFinite(latitude) ||
       !Number.isFinite(longitude)
     ) {
@@ -164,6 +163,7 @@ export function normaliseChurches(churchRecords, massRecords) {
         address: record.Address ? String(record.Address) : "",
         type: record.Type ? String(record.Type) : "",
         coordinates: [longitude, latitude],
+        hasMassTimes: masses.size > 0,
         masses: [...masses.values()],
         massTimes: createSchedule(masses),
         massTimesByLanguage: Object.fromEntries(

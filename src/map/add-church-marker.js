@@ -196,7 +196,8 @@ function createLanguageTabs(church) {
 }
 
 function createChurchBubble(church) {
-  const hasLanguageTabs = church.languages.length > 1;
+  const hasMassTimes = church.hasMassTimes;
+  const hasLanguageTabs = hasMassTimes && church.languages.length > 1;
   const photoUrl = getChurchPhotoUrl(church.id);
   const [longitude, latitude] = church.coordinates;
   const bubble = document.createElement("div");
@@ -205,14 +206,16 @@ function createChurchBubble(church) {
   bubble.setAttribute("role", "group");
   bubble.setAttribute(
     "aria-label",
-    hasLanguageTabs
+    hasMassTimes
       ? `Mass times for ${church.name}, ${church.locality}. Click the card to zoom.`
-      : `Zoom to ${church.name}, ${church.locality}`
+      : `Church details for ${church.name}, ${church.locality}. Click the card to zoom.`
   );
 
   const eyebrow = document.createElement("span");
   eyebrow.className = "church-mass-bubble__eyebrow";
-  eyebrow.textContent = `${church.locality} · Mass times`;
+  eyebrow.textContent = `${church.locality} · ${
+    hasMassTimes ? "Mass times" : "Church details"
+  }`;
 
   const name = document.createElement("strong");
   name.className = "church-mass-bubble__name";
@@ -287,10 +290,12 @@ function createChurchBubble(church) {
     bubble.append(type);
   }
 
-  if (hasLanguageTabs) {
-    bubble.append(createLanguageTabs(church));
-  } else {
-    bubble.append(createMassTimes(church.massTimes), language);
+  if (hasMassTimes) {
+    if (hasLanguageTabs) {
+      bubble.append(createLanguageTabs(church));
+    } else {
+      bubble.append(createMassTimes(church.massTimes), language);
+    }
   }
 
   bubble.append(actions);
@@ -304,11 +309,17 @@ export function addChurchMarker(map, church) {
   const bubble = createChurchBubble(church);
   const markerAnchor = document.createElement("div");
   markerAnchor.className = "church-marker-anchor";
+  markerAnchor.classList.toggle("has-no-mass-times", !church.hasMassTimes);
 
   const cross = document.createElement("button");
   cross.className = "church-cross";
   cross.type = "button";
-  cross.setAttribute("aria-label", `Show Mass times for ${church.name}`);
+  cross.setAttribute(
+    "aria-label",
+    church.hasMassTimes
+      ? `Show Mass times for ${church.name}`
+      : `Show church details for ${church.name}`
+  );
 
   const currentMass = document.createElement("button");
   currentMass.className = "current-mass-indicator";
@@ -512,9 +523,14 @@ export function addChurchMarker(map, church) {
 
   return {
     churchId: church.id,
+    hasMassTimes: church.hasMassTimes,
     marker,
     focus: focusChurch,
     close: closeBubble,
+    setVisible(visible) {
+      if (!visible) closeBubble();
+      markerAnchor.hidden = !visible;
+    },
     updateCurrentMassStatus
   };
 }

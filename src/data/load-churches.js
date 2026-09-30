@@ -26,7 +26,7 @@ export async function loadChurches() {
   );
 
   if (!churches.length) {
-    throw new Error("The church workbook contains no published Mass times");
+    throw new Error("The church workbook contains no churches with valid coordinates");
   }
 
   return churches;

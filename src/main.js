@@ -9,11 +9,25 @@ import { initialiseChurchSearch } from "./ui/church-search.js";
 const loading = document.querySelector("#loading");
 const loadingCard = document.querySelector(".loading-card");
 const resetView = document.querySelector("#reset-view");
+const noMassToggle = document.querySelector("#no-mass-toggle");
 
 const map = createMaltaMap("map");
 const churchesPromise = loadChurches();
 let churchMarkers = [];
 let churchMarkersById = new Map();
+let showNoMassChurches = true;
+
+function updateNoMassChurchVisibility() {
+  churchMarkers.forEach(({ hasMassTimes, setVisible }) => {
+    if (!hasMassTimes) setVisible(showNoMassChurches);
+  });
+
+  noMassToggle.classList.toggle("is-active", showNoMassChurches);
+  noMassToggle.setAttribute("aria-checked", String(showNoMassChurches));
+  noMassToggle.title = showNoMassChurches
+    ? "Hide churches without Mass times"
+    : "Show churches without Mass times";
+}
 
 function getChurchIdFromPath() {
   return /^\/(\d{4})\/?$/.exec(window.location.pathname)?.[1] ?? null;
@@ -58,6 +72,7 @@ map.on("load", async () => {
     churchMarkersById = new Map(
       churchMarkers.map((controller) => [controller.churchId, controller])
     );
+    updateNoMassChurchVisibility();
     initialiseChurchSearch(map, churches, churchMarkersById);
     const handleHistoryNavigation = () => applyPathToMap();
     window.addEventListener("popstate", handleHistoryNavigation);
@@ -94,4 +109,9 @@ map.on("error", (event) => {
 
 resetView.addEventListener("click", () => {
   showMaltaView();
+});
+
+noMassToggle.addEventListener("click", () => {
+  showNoMassChurches = !showNoMassChurches;
+  updateNoMassChurchVisibility();
 });

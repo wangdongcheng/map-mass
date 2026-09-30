@@ -11,7 +11,8 @@ The application is a static, client-side Vite project. It has no backend or acco
 - Malta- and Gozo-centred MapLibre map using OpenFreeMap's OpenStreetMap-derived tiles.
 - Constrained pan and zoom, disabled rotation, and a whole-island reset control.
 - Zoom-dependent 2.5D building extrusions from approximately zoom level `13.5`.
-- Red cross markers for churches with listed Mass schedules and valid coordinates.
+- Red cross markers for churches with Mass schedules and orange cross markers for churches without them.
+- A map toggle for showing or hiding churches without Mass times.
 - Live Mass-in-progress indicators evaluated in the `Europe/Malta` time zone.
 - A searchable church index covering church names, local names, localities, and addresses.
 - An empty-search menu grouped into the next five distinct Mass time slots.
@@ -26,7 +27,7 @@ The application is a static, client-side Vite project. It has no backend or acco
 
 ### Map markers and live Mass status
 
-Every published church is represented by a red cross. Hovering over a marker reveals its Mass card; clicking the card or selecting the church elsewhere in the interface zooms to the maximum map zoom, centres the church, and pins the detail card to the right side of the viewport.
+Every church with valid coordinates is represented on the map. Churches with Mass schedules use red crosses, while churches without Mass schedules use orange crosses. The toggle below the whole-island control shows or hides the orange markers. Hovering over a marker reveals its detail card; clicking the card or selecting the church elsewhere in the interface zooms to the maximum map zoom, centres the church, and pins the detail card to the right side of the viewport.
 
 A chalice indicator appears above a church while a Mass is in progress. The current implementation treats each Mass as lasting 60 minutes and refreshes live status every 30 seconds. Active indicators are layered above ordinary church markers so nearby crosses do not obscure them.
 
@@ -59,11 +60,7 @@ The application loads its data from:
 src/map/malta_all_church_mass_times.xlsx
 ```
 
-The workbook must contain `Churches` and `Mass Times` worksheets. During startup, the browser reads and normalizes both worksheets. A church is published only when:
-
-- its `Schedule status` is `Listed`;
-- it has at least one valid Mass record; and
-- it has finite latitude and longitude values.
+The workbook must contain `Churches` and `Mass Times` worksheets. During startup, the browser reads and normalizes both worksheets. Every church with a non-empty ID and finite latitude and longitude values is published. A church without a valid Mass record remains available as an orange marker and has a detail card without a timetable.
 
 Church IDs are normalized to four digits. Duplicate Mass records are removed using church, weekday, time, language, and note. Consecutive weekdays with identical schedules are combined for display.
 
