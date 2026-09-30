@@ -343,20 +343,15 @@ body {
   z-index: 40;
   top: 130px;
   right: 16px;
-  display: flex;
-  min-height: 34px;
-  padding: 5px 7px 5px 9px;
-  border: 1px solid rgb(69 78 73 / 14%);
-  border-radius: 12px;
-  align-items: center;
-  gap: 7px;
-  color: #856047;
+  display: grid;
+  width: 29px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 13px;
+  place-items: center;
   background: rgb(255 252 244 / 94%);
   box-shadow: 0 8px 22px rgb(23 64 78 / 16%);
-  font: inherit;
-  font-size: 0.69rem;
-  font-weight: 750;
-  line-height: 1;
   cursor: pointer;
   backdrop-filter: blur(12px);
 }
@@ -365,38 +360,64 @@ body {
   background: #fff;
 }
 
+.no-mass-toggle.is-active,
+.no-mass-toggle.is-active:hover {
+  background: #d97706;
+  box-shadow: 0 8px 22px rgb(120 63 5 / 24%);
+}
+
 .no-mass-toggle:focus-visible {
   outline: 3px solid rgb(217 119 6 / 30%);
   outline-offset: 2px;
 }
 
-.no-mass-toggle__track {
+.no-mass-toggle__icon {
   position: relative;
-  width: 30px;
-  height: 18px;
-  border-radius: 999px;
-  background: #b8c0c2;
-  transition: background 160ms ease;
+  width: 18px;
+  height: 22px;
+  opacity: 0.48;
 }
 
-.no-mass-toggle__thumb {
+.no-mass-toggle__icon::before,
+.no-mass-toggle__icon::after {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgb(44 55 58 / 28%);
-  transition: transform 160ms ease;
-}
-
-.no-mass-toggle.is-active .no-mass-toggle__track {
+  top: 50%;
+  left: 50%;
+  border-radius: 2px;
   background: #d97706;
+  content: "";
+  transform: translate(-50%, -50%);
 }
 
-.no-mass-toggle.is-active .no-mass-toggle__thumb {
-  transform: translateX(12px);
+.no-mass-toggle__icon::before {
+  width: 5px;
+  height: 18px;
+}
+
+.no-mass-toggle__icon::after {
+  width: 14px;
+  height: 5px;
+  margin-top: -2px;
+}
+
+.no-mass-toggle.is-active .no-mass-toggle__icon {
+  opacity: 1;
+}
+
+.no-mass-toggle.is-active .no-mass-toggle__icon::before,
+.no-mass-toggle.is-active .no-mass-toggle__icon::after {
+  background: #fff;
+}
+
+.no-mass-toggle:not(.is-active)::after {
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: #856047;
+  box-shadow: 0 0 0 1px rgb(255 252 244 / 90%);
+  content: "";
+  transform: rotate(-45deg);
 }
 
 .loading {
@@ -480,6 +501,10 @@ body {
 
 .church-marker-anchor.has-current-mass {
   z-index: 30;
+}
+
+.church-marker-anchor.is-bubble-open {
+  z-index: 40;
 }
 
 .church-cross {
