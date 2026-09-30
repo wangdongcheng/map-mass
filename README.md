@@ -202,3 +202,37 @@ Deep links such as `/0042` require the host to serve `index.html` as the fallbac
 ## Attribution
 
 Map Mass uses MapLibre GL JS, OpenFreeMap, and map data derived from OpenStreetMap. Production attribution must remain visible and comply with the requirements of the map, tile, schedule-data, and church-photo sources.
+
+## 中文简介
+
+Map Mass 是一个以地图为核心的网页应用，用于查找马耳他和戈佐岛的天主教堂及弥撒时间。项目为纯前端静态应用，不需要账户；教堂和弥撒数据随项目构建，收藏则保存在当前浏览器中。
+
+### 主要功能
+
+- 在地图上查看教堂位置，部分教堂提供自定义 3D 模型和照片。
+- 查看每座教堂的每周弥撒时间、语言、备注和 Google Maps 链接。
+- 自动显示正在进行的弥撒，以及接下来五个弥撒时间段。
+- 按教堂名称、当地名称、地区或地址搜索。
+- 在浏览器中收藏常用教堂。
+- 通过 `/0042` 这类四位教堂编号链接直接打开教堂详情。
+- 支持桌面端和移动端界面。
+
+### 基本用法
+
+在地图上点击红色十字标记，或通过顶部搜索框选择教堂，即可查看教堂详情和弥撒时间。搜索框为空时，会显示即将开始的弥撒和已收藏的教堂；圣杯图标表示该教堂当前有弥撒正在进行。
+
+本地运行需要 Node.js 20.19 或更高版本以及 npm：
+
+```bash
+npm install
+npm run dev
+```
+
+创建并预览生产版本：
+
+```bash
+npm run build
+npm run preview
+```
+
+生产文件会生成在 `dist/` 目录。底图和地图瓦片来自在线服务，因此使用时需要网络连接。
