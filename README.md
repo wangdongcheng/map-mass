@@ -1,5 +1,7 @@
 # Map Mass
 
+![alt text](public/og-image.png)
+
 Map Mass is a map-first web application for finding Catholic churches and Mass times across Malta and Gozo. It combines a stylized 2.5D island map with a normalized church schedule, live Mass status, church search, bookmarks, photos, and selected custom 3D church models.
 
 The application is a static, client-side Vite project. It has no backend or account system: church and schedule data are bundled with the build, while bookmarks are stored in the browser.
