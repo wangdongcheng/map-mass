@@ -1,169 +1,153 @@
 # Map Mass
 
-Map Mass is a map-first web application for discovering Catholic churches and Mass times across Malta and Gozo. Its central idea is to turn a conventional timetable into a living island view: churches are placed in a stylized 2.5D Malta, and relevant Mass events appear above them automatically according to the real local time.
+Map Mass is a map-first web application for finding Catholic churches and Mass times across Malta and Gozo. It combines a stylized 2.5D island map with a normalized church schedule, live Mass status, church search, bookmarks, photos, and selected custom 3D church models.
 
-The project is currently at the first prototype stage. The island map, navigation constraints, and 2.5D building layer are implemented. Church data, normalized schedules, and live event notifications are planned next.
+The application is a static, client-side Vite project. It has no backend or account system: church and schedule data are bundled with the build, while bookmarks are stored in the browser.
 
-## Product vision
+## Current features
 
-The finished experience should:
+- Malta- and Gozo-centred MapLibre map using OpenFreeMap's OpenStreetMap-derived tiles.
+- Constrained pan and zoom, disabled rotation, and a whole-island reset control.
+- Zoom-dependent 2.5D building extrusions from approximately zoom level `13.5`.
+- Red cross markers for churches with listed Mass schedules and valid coordinates.
+- Live Mass-in-progress indicators evaluated in the `Europe/Malta` time zone.
+- A searchable church index covering church names, local names, localities, and addresses.
+- An empty-search menu grouped into the next five distinct Mass time slots.
+- Expandable time groups listing each church, locality, and Mass language.
+- Local browser bookmarks, shown in the empty-search menu.
+- Church detail cards with photos, church type, language tabs, weekly schedules, notes, and Google Maps links.
+- Deep links using four-digit church paths such as `/0042`.
+- Custom Three.js church models for church IDs `0006`, `0042`, `0046`, `0246`, and `0260`.
+- Responsive desktop and mobile layouts and reduced-motion-aware map transitions.
 
-- Open directly on a recognizable whole-island view of Malta and Gozo.
-- Use a warm, slightly cartoon-like or clay-like visual language instead of a purely technical GIS appearance.
-- Show ordinary buildings as 2.5D blocks while making churches visually distinct.
-- Allow zooming and panning, while keeping map rotation disabled for a predictable overhead presentation.
-- Let users select a church to see its parish, address, languages, and complete Mass schedule.
-- Evaluate schedules against the current time in `Europe/Malta`.
-- Raise a clear event card above a church when a Mass is approaching, starting, or currently relevant.
-- Remain useful on both desktop and mobile screens.
+## How the interface works
 
-The map is not intended to be a driving-navigation product. It is an ambient, visual way to answer questions such as “Where is the next Mass near me?” and “Which churches have Mass soon?”
+### Map markers and live Mass status
 
-## Current prototype
+Every published church is represented by a red cross. Hovering over a marker reveals its Mass card; clicking the card or selecting the church elsewhere in the interface zooms to the maximum map zoom, centres the church, and pins the detail card to the right side of the viewport.
 
-The first version provides:
+A chalice indicator appears above a church while a Mass is in progress. The current implementation treats each Mass as lasting 60 minutes and refreshes live status every 30 seconds. Active indicators are layered above ordinary church markers so nearby crosses do not obscure them.
 
-- A Vite and vanilla JavaScript application.
-- Map rendering with MapLibre GL JS.
-- OpenStreetMap-derived vector tiles and styles provided by OpenFreeMap.
-- A constrained Malta-centered camera with zoom and pan support.
-- Rotation disabled for mouse and touch interaction.
-- 2.5D building extrusion when zooming into populated areas.
-- A whole-island reset button.
-- Responsive controls, loading feedback, and a production build suitable for static hosting.
-- An explicitly bundled MapLibre worker for reliable Vite development and production builds.
+### Search and upcoming Masses
 
-Buildings begin to rise at approximately zoom level `13.5`. The initial whole-island view intentionally remains flatter and less cluttered.
+Typing in the search field returns up to eight ranked church matches. With the field empty, the menu shows the next five distinct Mass time slots. Expanding a slot reveals its churches and combines multiple languages for the same church and time.
 
-## Planned user experience
+Selecting a church from search, an upcoming time group, or bookmarks uses the same map interaction as selecting a marker.
 
-### Church layer
+### Church details
 
-Each church will have a stable identifier, coordinates, display name, parish or locality, denomination or rite where relevant, and optional presentation metadata. Churches should remain recognizable at useful zoom levels without overwhelming the base map.
+Church detail cards can include:
 
-Important churches may eventually use simplified custom 3D models. The first implementation should use lightweight symbols, highlighted footprints, or markers so that the island remains fast on ordinary phones.
+- English and local church names;
+- locality and church type;
+- a church photo when one is available;
+- a weekly Mass timetable;
+- separate language tabs for multilingual schedules;
+- schedule notes;
+- a Google Maps link; and
+- a local bookmark control.
 
-### Mass-time events
+Direct church URLs use the stable four-digit ID. Browser back and forward navigation restores the corresponding map state.
 
-Schedules will be stored as structured data rather than embedded in presentation code. A client-side scheduler can initially compare the current Malta time with the normalized records and generate map events.
+## Data
 
-An event may have states such as:
+The application loads its data from:
 
-- `upcoming`: begins within a configurable time window.
-- `starting`: begins now or within a few minutes.
-- `in_progress`: currently taking place when duration is known or estimated.
-- `finished`: no longer displayed as an active event.
-
-To avoid a screen full of overlapping cards, the interface should prioritize the nearest upcoming events, cluster or suppress lower-priority notices, and reveal full information after a user selects a church.
-
-### Suggested schedule record
-
-```json
-{
-  "churchId": "mt-valletta-st-john",
-  "dayOfWeek": "Sunday",
-  "time": "10:30",
-  "language": "Maltese",
-  "season": "all-year",
-  "notes": null,
-  "source": {
-    "url": "https://example.org/church-schedule",
-    "checkedAt": "2026-09-28"
-  }
-}
+```text
+src/map/malta_all_church_mass_times.xlsx
 ```
 
-Future data rules will need to account for Sunday and weekday schedules, vigils, feast days, seasonal changes, public holidays, language, temporary cancellations, and source verification dates.
+The workbook must contain `Churches` and `Mass Times` worksheets. During startup, the browser reads and normalizes both worksheets. A church is published only when:
 
-## Data strategy
+- its `Schedule status` is `Listed`;
+- it has at least one valid Mass record; and
+- it has finite latitude and longitude values.
 
-The intended church list and Mass schedules will be assembled from public church or parish information, including the Malta results listed by MassHour where its terms permit. OpenStreetMap can provide church locations and building geometry, but schedule information must be normalized and verified separately.
+Church IDs are normalized to four digits. Duplicate Mass records are removed using church, weekday, time, language, and note. Consecutive weekdays with identical schedules are combined for display.
 
-Every schedule should retain its source and last verification date. Parish-maintained information should take precedence when sources disagree. Before automated collection or republication, the relevant website terms, attribution requirements, and data permissions must be reviewed.
+Current schedule records use weekday, time, language, and optional note fields. The application evaluates all time-sensitive behavior in `Europe/Malta` rather than the viewer's local time zone.
 
-The prototype can begin with version-controlled JSON files. A later release may introduce an authenticated administration interface and database so schedule corrections can be published without rebuilding the frontend.
+Seasonal schedules, feast days, public holidays, temporary cancellations, and other date-specific exceptions are not yet modeled automatically and must be handled through data maintenance.
+
+## Church photos
+
+Runtime church photos live under `references/church-photos/` and use this naming convention:
+
+```text
+references/church-photos/<church-id>/<church-id>.<extension>
+```
+
+For example:
+
+```text
+references/church-photos/0042/0042.jpg
+references/church-photos/0246/0246.png
+```
+
+Supported extensions are `.jpg`, `.jpeg`, `.png`, `.webp`, and `.avif`. The folder name and file name must contain the same four-digit church ID. Other images in these folders are treated only as modeling references and are not included as church-card photos.
+
+## Custom 3D church models
+
+Custom models are implemented as lightweight Three.js geometry rather than external model files. Each model has its own directory:
+
+```text
+src/map/church-models/<church-id>/
+  config.js
+  create-model.js
+```
+
+Models are registered in `src/map/church-models/registry.js` and loaded asynchronously after the main map is ready. Shared geometry, material, and disposal helpers live in `src/map/church-models/shared/`.
+
+To add another model:
+
+1. Create a directory named with the four-digit church ID.
+2. Add `config.js` and `create-model.js` following an existing model.
+3. Register the configuration in `registry.js`.
+4. Add a matching runtime photo if the church card should display one.
+5. Verify the model's position, scale, rotation, and visibility at supported zoom levels.
 
 ## Technical design
 
-| Area | Current choice | Purpose |
-| --- | --- | --- |
-| Application tooling | Vite | Fast local development and static production builds |
-| UI code | Vanilla JavaScript and CSS | Keeps the first version small and framework-independent |
-| Map engine | MapLibre GL JS | WebGL map rendering, vector styling, markers, and 2.5D extrusion |
-| Base map | OpenFreeMap | Hosted OpenStreetMap-derived vector tiles and map style |
-| Building effect | `fill-extrusion` layer | Converts building attributes into 2.5D blocks |
-| Time zone | `Europe/Malta` | Ensures event evaluation follows real Malta local time |
-| Initial hosting target | Cloudflare Pages | Static deployment with global caching |
+| Area | Current implementation |
+| --- | --- |
+| Application tooling | Vite 8 |
+| UI | Vanilla JavaScript and CSS |
+| Map engine | MapLibre GL JS |
+| Base map | OpenFreeMap bright style and planet vector source |
+| 3D rendering | MapLibre fill extrusions and a custom Three.js layer |
+| Workbook reader | `read-excel-file` |
+| Schedule time zone | `Europe/Malta` |
+| Client persistence | `localStorage` for church bookmarks |
+| Deployment model | Static files generated in `dist/` |
 
-The intended data flow is:
+The main startup flow is:
 
-1. Load the base map and 2.5D building layer.
-2. Load normalized church and schedule data.
-3. Convert recurring schedules into occurrences for the current Malta date.
-4. Determine which occurrences are upcoming or active.
-5. Render church symbols and prioritized event cards on the map.
-6. Re-evaluate at a small interval and after visibility or time-zone changes.
+1. Create the Malta map and load the base style.
+2. Add the 2.5D building layer.
+3. Load and normalize the church workbook.
+4. Add church markers and initialize search.
+5. Restore any church deep link from the current URL.
+6. Refresh current-Mass state every 30 seconds.
+7. Load registered custom church models asynchronously.
 
-## Proposed project structure
+## Project structure
 
 ```text
+public/                         Static branding and favicon assets
+references/church-photos/       Runtime church photos and modeling references
 src/
-  data/
-    churches.json
-    mass-times.json
+  data/                         Workbook normalization, schedules, photos, bookmarks
   map/
-    create-map.js
-    add-building-layer.js
-    add-church-layer.js
-  schedule/
-    normalize-schedule.js
-    get-current-events.js
-  ui/
-    church-popup.js
-    event-marker.js
-  main.js
+    church-models/              Registered Three.js church models
+    add-building-layer.js       2.5D OpenStreetMap buildings
+    add-church-marker.js        Church markers and detail cards
+    add-church-models-layer.js  MapLibre/Three.js integration
+    create-map.js               Map configuration and Malta camera limits
+    malta_all_church_mass_times.xlsx
+  ui/church-search.js           Search, bookmarks, and upcoming time groups
+  main.js                       Application startup and URL synchronization
+  styles.css                    Application styles
 ```
-
-Only the files required by the current prototype exist today. The remaining modules describe the planned separation of map rendering, schedule logic, data, and UI.
-
-## Roadmap
-
-### Phase 1 — Map foundation
-
-- [x] Create the Vite application.
-- [x] Center and constrain the map around Malta and Gozo.
-- [x] Add OpenStreetMap-derived base-map data.
-- [x] Add zoom-dependent 2.5D buildings.
-- [x] Support pan and zoom while disabling rotation.
-- [x] Configure the MapLibre worker for Vite.
-
-### Phase 2 — Churches
-
-- [ ] Build and verify the Malta church inventory.
-- [ ] Geocode and manually review church coordinates.
-- [ ] Add a dedicated church source and map layer.
-- [ ] Add church detail popups and locality filtering.
-
-### Phase 3 — Mass schedules
-
-- [ ] Define the normalized schedule schema.
-- [ ] Import Mass-time records with source metadata.
-- [ ] Handle weekday, Sunday, vigil, seasonal, and exceptional schedules.
-- [ ] Add validation and duplicate detection.
-
-### Phase 4 — Live map events
-
-- [ ] Evaluate events using real `Europe/Malta` time.
-- [ ] Display upcoming and starting Mass notices above churches.
-- [ ] Resolve overlapping notices with prioritization and clustering.
-- [ ] Add language, distance, and time-window filters.
-
-### Phase 5 — Visual and operational polish
-
-- [ ] Develop the clay-like color palette and custom church presentation.
-- [ ] Improve mobile performance and accessibility.
-- [ ] Add an administration workflow for schedule corrections.
-- [ ] Add data freshness monitoring and source review reminders.
 
 ## Local development
 
@@ -186,31 +170,35 @@ npm run build
 npm run preview
 ```
 
-The generated static site is written to `dist/`.
+The production site is written to `dist/`. The base map requires an internet connection because map styles and vector tiles are loaded from OpenFreeMap.
 
-If Vite retains an outdated dependency cache after a MapLibre upgrade, stop the development server, delete `node_modules/.vite`, and restart with:
+If Vite retains an outdated dependency cache after a MapLibre upgrade, stop the development server and restart with:
 
 ```bash
 npm run dev -- --force
 ```
 
-## Cloudflare Pages
+## Static deployment
 
-Use these build settings:
+For Cloudflare Pages or another static host, use:
 
 - Build command: `npm run build`
-- Build output directory: `dist`
+- Output directory: `dist`
 
-No API key is required for the current OpenFreeMap-based prototype. Production usage should still review the selected tile provider's service policy and capacity expectations.
+No API key is currently required for the OpenFreeMap base map. Production deployments should review the tile provider's current usage policy and capacity expectations.
+
+Deep links such as `/0042` require the host to serve `index.html` as the fallback for unknown paths.
 
 ## Current limitations
 
-- The repository does not yet contain the verified church inventory or Mass-time dataset.
-- Church-specific markers and event cards are not implemented yet.
-- The current style is a functional visual foundation, not the final clay-art direction.
-- Building height and completeness depend on upstream OpenStreetMap data.
-- The prototype has no backend, account system, or schedule editor.
+- Schedule data is bundled into the application and requires a rebuild to publish corrections.
+- There is no administration interface, backend, authentication, or cross-device bookmark sync.
+- Current-Mass duration is fixed at 60 minutes for every schedule entry.
+- Date-specific exceptions and seasonal schedules are not evaluated automatically.
+- Only selected churches have custom 3D models and runtime photos.
+- Building geometry and height depend on upstream OpenStreetMap data.
+- Overlapping markers are prioritized by UI layer order rather than geographic clustering.
 
 ## Attribution
 
-This application uses MapLibre GL JS and map data derived from OpenStreetMap through OpenFreeMap. Final production attribution must remain visible and comply with the requirements of all map, tile, and schedule-data providers.
+Map Mass uses MapLibre GL JS, OpenFreeMap, and map data derived from OpenStreetMap. Production attribution must remain visible and comply with the requirements of the map, tile, schedule-data, and church-photo sources.
