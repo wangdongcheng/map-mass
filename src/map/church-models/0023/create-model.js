@@ -295,5 +295,11 @@ export function createModel() {
   addTower(church, -8.25, materials);
   addTower(church, 8.25, materials);
 
+  // Fit the architectural model to the oriented bounds of OSM way 139523273.
+  // The source model is intentionally scaled only in plan so its height and
+  // recognisable facade proportions remain unchanged.
+  church.scale.set(0.68, 1, 1.24);
+  church.position.set(0.91, 0, -0.64);
+
   return church;
 }
