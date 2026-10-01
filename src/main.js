@@ -108,6 +108,8 @@ map.on("error", (event) => {
 });
 
 resetView.addEventListener("click", () => {
+  showNoMassChurches = false;
+  updateNoMassChurchVisibility();
   showMaltaView();
 });
 
