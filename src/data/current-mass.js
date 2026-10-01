@@ -50,22 +50,32 @@ function parseTime(time) {
 
 export function getMassesInProgress(masses, date = new Date()) {
   const now = getMaltaDayAndMinute(date);
+  const activeMasses = masses.filter((mass) => {
+    if (mass.day !== now.day) {
+      return false;
+    }
+
+    const start = parseTime(mass.time);
+
+    return (
+      start !== null &&
+      now.minute >= start &&
+      now.minute < start + MASS_DURATION_MINUTES
+    );
+  });
+  const remainingMinutes = activeMasses.length
+    ? Math.min(
+        ...activeMasses.map(
+          (mass) => parseTime(mass.time) + MASS_DURATION_MINUTES - now.minute
+        )
+      )
+    : 0;
 
   return {
     day: now.day,
-    masses: masses.filter((mass) => {
-      if (mass.day !== now.day) {
-        return false;
-      }
-
-      const start = parseTime(mass.time);
-
-      return (
-        start !== null &&
-        now.minute >= start &&
-        now.minute < start + MASS_DURATION_MINUTES
-      );
-    })
+    masses: activeMasses,
+    remainingMinutes,
+    remainingFraction: remainingMinutes / MASS_DURATION_MINUTES
   };
 }
 

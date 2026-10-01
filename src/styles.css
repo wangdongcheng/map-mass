@@ -675,10 +675,16 @@ body {
   display: none;
 }
 
-.current-mass-indicator img {
+.current-mass-indicator__pie {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgb(139 15 35 / 20%);
+  border-radius: 50%;
+  background: conic-gradient(
+    #FFE4A3 var(--mass-remaining, 100%),
+    #D99017 0
+  );
 }
 
 .church-marker-anchor.is-bubble-open .current-mass-indicator,

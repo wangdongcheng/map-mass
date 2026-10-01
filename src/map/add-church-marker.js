@@ -330,9 +330,8 @@ export function addChurchMarker(map, church) {
   );
   currentMass.title = "Mass in progress — zoom to church";
 
-  const currentMassIcon = document.createElement("img");
-  currentMassIcon.src = "/favicon.svg";
-  currentMassIcon.alt = "";
+  const currentMassIcon = document.createElement("span");
+  currentMassIcon.className = "current-mass-indicator__pie";
   currentMassIcon.setAttribute("aria-hidden", "true");
   currentMass.append(currentMassIcon);
 
@@ -516,6 +515,17 @@ export function addChurchMarker(map, church) {
     const hasCurrentMass = activeTimes.size > 0;
     currentMass.hidden = !hasCurrentMass;
     markerAnchor.classList.toggle("has-current-mass", hasCurrentMass);
+    currentMassIcon.style.setProperty(
+      "--mass-remaining",
+      `${current.remainingFraction * 100}%`
+    );
+    const statusLabel = hasCurrentMass
+      ? `Mass in progress at ${church.name}. About ${current.remainingMinutes} ${
+          current.remainingMinutes === 1 ? "minute" : "minutes"
+        } remaining (estimated 60-minute Mass). Zoom to church.`
+      : `Mass in progress at ${church.name}. Zoom to church.`;
+    currentMass.setAttribute("aria-label", statusLabel);
+    currentMass.title = statusLabel;
 
     bubble?.querySelectorAll(".mass-time-entry").forEach((entry) => {
       const isCurrent =
