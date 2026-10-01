@@ -477,14 +477,7 @@ body {
 }
 
 .powered-by {
-  gap: 7px;
   padding: 1px 8px;
-  text-transform: uppercase;
-}
-
-.powered-by span {
-  line-height: 1.2;
-  text-align: center;
 }
 
 .powered-by img {
