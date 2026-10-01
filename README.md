@@ -139,12 +139,15 @@ src/
   map/
     church-models/              Registered Three.js church models
     add-building-layer.js       2.5D OpenStreetMap buildings
-    add-church-marker.js        Church markers and detail cards
+    add-church-marker.js        Marker interaction, lazy cards, and live indicators
     add-church-models-layer.js  MapLibre/Three.js integration
     create-map.js               Map configuration and Malta camera limits
     malta_all_church_mass_times.xlsx
-  ui/church-search.js           Search, bookmarks, and upcoming time groups
-  main.js                       Application startup and URL synchronization
+  ui/
+    church-details.js          Detail cards, language tabs, bookmarks, live highlights
+    church-navigation.js       Church selection, camera movement, URLs, and history
+    church-search.js           Search, bookmarks, and upcoming time groups
+  main.js                       Application startup and module wiring
   styles.css                    Application styles
 ```
 
