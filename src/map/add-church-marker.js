@@ -4,7 +4,7 @@ import {
   toggleChurchBookmark
 } from "../data/church-bookmarks.js";
 import { getChurchPhotoUrl } from "../data/church-photos.js";
-import { getMassesInProgress } from "../data/current-mass.js";
+import { getMassesInProgress, getUpcomingMasses } from "../data/current-mass.js";
 
 const SHORT_DAY_NAMES = {
   Monday: "Mon",
@@ -115,6 +115,13 @@ function createMassTimes(schedule) {
   return wrapper;
 }
 
+function createNextMass(language = "") {
+  const nextMass = document.createElement("p");
+  nextMass.className = "church-mass-bubble__next-mass";
+  nextMass.dataset.language = language;
+  return nextMass;
+}
+
 function createLanguageTabs(church) {
   const tabs = document.createElement("div");
   tabs.className = "church-language-tabs";
@@ -156,7 +163,10 @@ function createLanguageTabs(church) {
     panel.id = panelId;
     panel.setAttribute("role", "tabpanel");
     panel.setAttribute("aria-labelledby", tabId);
-    panel.append(createMassTimes(church.massTimesByLanguage[language]));
+    panel.append(
+      createMassTimes(church.massTimesByLanguage[language]),
+      createNextMass(language)
+    );
 
     tab.addEventListener("pointerdown", (event) => event.stopPropagation());
     tab.addEventListener("click", (event) => {
@@ -294,7 +304,7 @@ function createChurchBubble(church) {
     if (hasLanguageTabs) {
       bubble.append(createLanguageTabs(church));
     } else {
-      bubble.append(createMassTimes(church.massTimes), language);
+      bubble.append(createMassTimes(church.massTimes), language, createNextMass());
     }
   }
 
@@ -491,6 +501,28 @@ export function addChurchMarker(map, church) {
   });
 
   const updateCurrentMassStatus = (date = new Date()) => {
+    const nextMassLabels = bubble.querySelectorAll(".church-mass-bubble__next-mass");
+    if (nextMassLabels.length) {
+      const upcomingMasses = getUpcomingMasses([church], date, church.masses.length);
+      nextMassLabels.forEach((label) => {
+        const upcoming = upcomingMasses.find(
+          ({ mass }) => !label.dataset.language || mass.language === label.dataset.language
+        );
+
+        if (!upcoming) {
+          label.textContent = "Next Mass: unavailable";
+          return;
+        }
+
+        const { mass, dayOffset, startMinute } = upcoming;
+        const day = dayOffset === 0 ? "today" : dayOffset === 1 ? "tomorrow" : mass.day;
+        const hour = Math.floor(startMinute / 60);
+        const minute = startMinute % 60;
+        const time = `${hour % 12 || 12}${minute ? `:${String(minute).padStart(2, "0")}` : ""}${hour < 12 ? "am" : "pm"}`;
+        label.textContent = `Next Mass: ${day} ${time}`;
+      });
+    }
+
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
     const hasCurrentMass = activeTimes.size > 0;

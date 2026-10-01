@@ -811,6 +811,15 @@ body {
   margin-top: 2px;
 }
 
+.church-mass-bubble__next-mass {
+  flex: 0 0 auto;
+  margin: 8px 0 10px;
+  color: #690f20;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
 .church-mass-bubble__map-link,
 .church-mass-bubble__bookmark {
   display: inline-flex;
