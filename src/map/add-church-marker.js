@@ -4,7 +4,10 @@ import {
   toggleChurchBookmark
 } from "../data/church-bookmarks.js";
 import { getChurchPhotoUrl } from "../data/church-photos.js";
-import { getMassesInProgress } from "../data/current-mass.js";
+import {
+  getMassesInProgress,
+  getNextMassStartingSoon
+} from "../data/current-mass.js";
 
 const SHORT_DAY_NAMES = {
   Monday: "Mon",
@@ -333,7 +336,12 @@ export function addChurchMarker(map, church) {
   const currentMassIcon = document.createElement("span");
   currentMassIcon.className = "current-mass-indicator__pie";
   currentMassIcon.setAttribute("aria-hidden", "true");
-  currentMass.append(currentMassIcon);
+  const startingSoonIcon = document.createElement("img");
+  startingSoonIcon.className = "current-mass-indicator__hourglass";
+  startingSoonIcon.src = "/mass-hourglass.svg";
+  startingSoonIcon.alt = "";
+  startingSoonIcon.setAttribute("aria-hidden", "true");
+  currentMass.append(currentMassIcon, startingSoonIcon);
 
   // Use a separate map marker so every indicator sits above every cross.
   const currentMassAnchor = document.createElement("div");
@@ -533,17 +541,23 @@ export function addChurchMarker(map, church) {
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
     const hasCurrentMass = activeTimes.size > 0;
-    currentMass.hidden = !hasCurrentMass;
-    currentMassAnchor.hidden = !hasCurrentMass || !isVisible;
+    const startingSoon = hasCurrentMass
+      ? null
+      : getNextMassStartingSoon(church.masses, date);
+    const hasIndicator = hasCurrentMass || startingSoon !== null;
+    currentMass.hidden = !hasIndicator;
+    currentMassAnchor.hidden = !hasIndicator || !isVisible;
+    currentMassIcon.hidden = !hasCurrentMass;
+    startingSoonIcon.hidden = startingSoon === null;
 
-    if (hasCurrentMass && !currentMassMarker) {
+    if (hasIndicator && !currentMassMarker) {
       currentMassMarker = new Marker({
         element: currentMassAnchor,
         anchor: "center"
       })
         .setLngLat(church.coordinates)
         .addTo(map);
-    } else if (!hasCurrentMass && currentMassMarker) {
+    } else if (!hasIndicator && currentMassMarker) {
       currentMassMarker.remove();
       currentMassMarker = null;
     }
@@ -555,7 +569,11 @@ export function addChurchMarker(map, church) {
       ? `Mass in progress at ${church.name}. About ${current.remainingMinutes} ${
           current.remainingMinutes === 1 ? "minute" : "minutes"
         } remaining (estimated 60-minute Mass). Zoom to church.`
-      : `Mass in progress at ${church.name}. Zoom to church.`;
+      : startingSoon
+        ? `Mass starts in ${startingSoon.minutesUntilStart} ${
+            startingSoon.minutesUntilStart === 1 ? "minute" : "minutes"
+          } at ${church.name} (${startingSoon.mass.time}). Zoom to church.`
+        : `Show Mass times for ${church.name}. Zoom to church.`;
     currentMass.setAttribute("aria-label", statusLabel);
     currentMass.title = statusLabel;
 

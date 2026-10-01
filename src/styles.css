@@ -699,6 +699,19 @@ body {
   );
 }
 
+.current-mass-indicator__hourglass {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.current-mass-indicator__pie[hidden],
+.current-mass-indicator__hourglass[hidden] {
+  display: none;
+}
+
 .current-mass-marker-anchor.is-bubble-open .current-mass-indicator {
   opacity: 0;
   pointer-events: none;

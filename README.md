@@ -29,7 +29,7 @@ The application is a static, client-side Vite project. It has no backend or acco
 
 Every church with valid coordinates is represented on the map. Churches with Mass schedules use red crosses, while churches without Mass schedules use orange crosses. The toggle below the whole-island control shows or hides the orange markers. Hovering over a marker reveals its detail card; clicking the card or selecting the church elsewhere in the interface zooms to the maximum map zoom, centres the church, and pins the detail card to the right side of the viewport.
 
-A chalice indicator appears above a church while a Mass is in progress. The current implementation treats each Mass as lasting 60 minutes and refreshes live status every 30 seconds. Active indicators are layered above ordinary church markers so nearby crosses do not obscure them.
+A red-and-white pie indicator appears above a church while a Mass is in progress, with the elapsed portion filling clockwise from the top. An hourglass appears during the 15 minutes before the next Mass starts and switches to the pie at the start. A Mass in progress takes priority over an upcoming Mass. The current implementation treats each Mass as lasting 60 minutes and refreshes live status every 30 seconds. Both indicators are layered above ordinary church markers so nearby crosses do not obscure them.
 
 ### Search and upcoming Masses
 
