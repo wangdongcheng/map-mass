@@ -482,6 +482,11 @@ body {
   text-transform: uppercase;
 }
 
+.powered-by span {
+  line-height: 1.2;
+  text-align: center;
+}
+
 .powered-by img {
   display: block;
   width: 92px;
