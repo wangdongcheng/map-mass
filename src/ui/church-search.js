@@ -333,8 +333,18 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     churchesFound.forEach((church, resultIndex) => {
       const option = createOption(resultIndex, church);
 
+      const cross = document.createElement("span");
+      cross.className = "church-search__cross";
+      cross.classList.toggle("has-no-mass-times", !church.hasMassTimes);
+      cross.setAttribute("role", "img");
+      const massStatus = church.hasMassTimes
+        ? "Mass times available"
+        : "No Mass times listed";
+      cross.setAttribute("aria-label", massStatus);
+      cross.title = massStatus;
+
       const name = document.createElement("strong");
-      name.textContent = church.localName || church.name;
+      name.append(cross, document.createTextNode(church.localName || church.name));
 
       const alternateName = document.createElement("span");
       alternateName.className = "church-search__alternate";
