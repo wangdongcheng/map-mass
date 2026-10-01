@@ -15,7 +15,7 @@ const map = createMaltaMap("map");
 const churchesPromise = loadChurches();
 let churchMarkers = [];
 let churchMarkersById = new Map();
-let showNoMassChurches = true;
+let showNoMassChurches = false;
 
 function updateNoMassChurchVisibility() {
   churchMarkers.forEach(({ hasMassTimes, setVisible }) => {
