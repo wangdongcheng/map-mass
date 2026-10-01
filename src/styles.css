@@ -573,12 +573,20 @@ body {
   z-index: 20;
 }
 
-.church-marker-anchor.has-current-mass {
-  z-index: 30;
+.church-marker-anchor.is-bubble-open:not(.is-bubble-focused) {
+  z-index: 40;
 }
 
-.church-marker-anchor.is-bubble-open {
-  z-index: 40;
+.current-mass-marker-anchor {
+  position: absolute;
+  z-index: 30;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.current-mass-marker-anchor[hidden] {
+  display: none;
 }
 
 .church-cross {
@@ -654,6 +662,7 @@ body {
   line-height: 1;
   cursor: pointer;
   transform: translateX(-50%);
+  pointer-events: auto;
   transform-origin: 50% 100%;
   animation: current-mass-ring 2.4s ease-in-out infinite;
 }
@@ -676,20 +685,23 @@ body {
 }
 
 .current-mass-indicator__pie {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 20px;
   height: 20px;
   border: 1px solid rgb(139 15 35 / 20%);
   border-radius: 50%;
   background: conic-gradient(
-    #FFE4A3 var(--mass-remaining, 100%),
-    #D99017 0
+    from 0deg,
+    rgb(201 54 44 / 70%) calc(100% - var(--mass-remaining, 100%)),
+    #fff 0
   );
 }
 
-.church-marker-anchor.is-bubble-open .current-mass-indicator,
-.church-marker-anchor:focus-within .current-mass-indicator {
+.current-mass-marker-anchor.is-bubble-open .current-mass-indicator {
   opacity: 0;
+  pointer-events: none;
 }
 
 .church-marker-anchor.is-bubble-open .church-cross,
@@ -783,12 +795,12 @@ body {
   transform: scale(1);
 }
 
-.church-marker-anchor.is-bubble-focused .current-mass-indicator {
+.current-mass-marker-anchor.is-bubble-focused .current-mass-indicator {
   opacity: 1;
   pointer-events: auto;
 }
 
-.church-marker-anchor .current-mass-indicator:focus-visible {
+.current-mass-marker-anchor .current-mass-indicator:focus-visible {
   opacity: 1;
   outline: 3px solid rgb(207 20 43 / 38%);
   outline-offset: 3px;

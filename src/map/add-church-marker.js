@@ -335,6 +335,13 @@ export function addChurchMarker(map, church) {
   currentMassIcon.setAttribute("aria-hidden", "true");
   currentMass.append(currentMassIcon);
 
+  // Use a separate map marker so every indicator sits above every cross.
+  const currentMassAnchor = document.createElement("div");
+  currentMassAnchor.className = "current-mass-marker-anchor";
+  currentMassAnchor.append(currentMass);
+  let currentMassMarker;
+  let isVisible = true;
+
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
   let autoDismissTimer;
@@ -382,6 +389,7 @@ export function addChurchMarker(map, church) {
 
   const focusBubbleAtSide = () => {
     markerAnchor.classList.add("is-bubble-focused");
+    currentMassAnchor.classList.add("is-bubble-focused");
     bubble.classList.add("is-bubble-focused");
     map.getContainer().append(bubble);
   };
@@ -397,9 +405,14 @@ export function addChurchMarker(map, church) {
     }
     markerAnchor.classList.remove("is-bubble-open");
     markerAnchor.classList.remove("is-bubble-focused");
+    currentMassAnchor.classList.remove("is-bubble-open");
+    currentMassAnchor.classList.remove("is-bubble-focused");
     isPinned = false;
 
-    if (markerAnchor.contains(document.activeElement)) {
+    if (
+      markerAnchor.contains(document.activeElement) ||
+      currentMassAnchor.contains(document.activeElement)
+    ) {
       document.activeElement.blur();
     }
 
@@ -421,6 +434,7 @@ export function addChurchMarker(map, church) {
     }
 
     markerAnchor.classList.add("is-bubble-open");
+    currentMassAnchor.classList.add("is-bubble-open");
     window.clearTimeout(autoDismissTimer);
 
     if (!isPinned) {
@@ -442,7 +456,7 @@ export function addChurchMarker(map, church) {
   cross.addEventListener("focus", openBubble);
   cross.addEventListener("click", openBubble);
 
-  markerAnchor.addEventListener("pointerenter", (event) => {
+  const handlePointerEnter = (event) => {
     if (event.pointerType !== "mouse") {
       return;
     }
@@ -456,9 +470,9 @@ export function addChurchMarker(map, church) {
     hoverTimer = window.setTimeout(() => {
       openBubble();
     }, BUBBLE_HOVER_DELAY);
-  });
+  };
 
-  markerAnchor.addEventListener("pointermove", (event) => {
+  const handlePointerMove = (event) => {
     if (
       markerAnchor.classList.contains("is-bubble-open") ||
       bubble?.contains(event.target)
@@ -468,16 +482,22 @@ export function addChurchMarker(map, church) {
 
     hoverPointer = { clientX: event.clientX, clientY: event.clientY };
     updateBubblePointer();
-  });
+  };
 
-  markerAnchor.addEventListener("pointerleave", () => {
+  const handlePointerLeave = () => {
     hoverPointer = null;
     window.clearTimeout(hoverTimer);
 
     if (!markerAnchor.classList.contains("is-bubble-open")) {
       closeBubble();
     }
-  });
+  };
+
+  for (const anchor of [markerAnchor, currentMassAnchor]) {
+    anchor.addEventListener("pointerenter", handlePointerEnter);
+    anchor.addEventListener("pointermove", handlePointerMove);
+    anchor.addEventListener("pointerleave", handlePointerLeave);
+  }
 
   const zoomToChurch = () => {
     const prefersReducedMotion = window.matchMedia(
@@ -514,7 +534,19 @@ export function addChurchMarker(map, church) {
     const activeTimes = new Set(current.masses.map(({ time }) => time));
     const hasCurrentMass = activeTimes.size > 0;
     currentMass.hidden = !hasCurrentMass;
-    markerAnchor.classList.toggle("has-current-mass", hasCurrentMass);
+    currentMassAnchor.hidden = !hasCurrentMass || !isVisible;
+
+    if (hasCurrentMass && !currentMassMarker) {
+      currentMassMarker = new Marker({
+        element: currentMassAnchor,
+        anchor: "center"
+      })
+        .setLngLat(church.coordinates)
+        .addTo(map);
+    } else if (!hasCurrentMass && currentMassMarker) {
+      currentMassMarker.remove();
+      currentMassMarker = null;
+    }
     currentMassIcon.style.setProperty(
       "--mass-remaining",
       `${current.remainingFraction * 100}%`
@@ -542,7 +574,7 @@ export function addChurchMarker(map, church) {
   };
 
   updateCurrentMassStatus();
-  markerAnchor.append(cross, currentMass);
+  markerAnchor.append(cross);
 
   const marker = new Marker({
     element: markerAnchor,
@@ -559,7 +591,9 @@ export function addChurchMarker(map, church) {
     close: closeBubble,
     setVisible(visible) {
       if (!visible) closeBubble();
+      isVisible = visible;
       markerAnchor.hidden = !visible;
+      currentMassAnchor.hidden = !visible || currentMass.hidden;
     },
     updateCurrentMassStatus
   };
