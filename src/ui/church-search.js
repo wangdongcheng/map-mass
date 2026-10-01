@@ -65,7 +65,7 @@ function getMatches(index, value) {
     .map(({ entry }) => entry.church);
 }
 
-export function initialiseChurchSearch(map, churches, markerControllers) {
+export function initialiseChurchSearch(churches, navigation) {
   const container = document.querySelector("#church-search");
   const input = document.querySelector("#church-search-input");
   const results = document.querySelector("#church-search-results");
@@ -84,7 +84,7 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
   };
 
   const closeChurchBubbles = () => {
-    markerControllers.forEach(({ close }) => close());
+    navigation.closeDetails();
   };
 
   const activateSearch = () => {
@@ -113,22 +113,7 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     input.value = church.localName || church.name;
     closeResults();
 
-    const markerController = markerControllers.get(church.id);
-
-    if (markerController) {
-      markerController.focus();
-      return;
-    }
-
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    map.flyTo({
-      center: church.coordinates,
-      zoom: map.getMaxZoom(),
-      duration: reducedMotion ? 0 : 1500,
-      essential: !reducedMotion
-    });
+    navigation.selectChurch(church.id);
   };
 
   const createOption = (resultIndex, church) => {
@@ -333,8 +318,18 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     churchesFound.forEach((church, resultIndex) => {
       const option = createOption(resultIndex, church);
 
+      const cross = document.createElement("span");
+      cross.className = "church-search__cross";
+      cross.classList.toggle("has-no-mass-times", !church.hasMassTimes);
+      cross.setAttribute("role", "img");
+      const massStatus = church.hasMassTimes
+        ? "Mass times available"
+        : "No Mass times listed";
+      cross.setAttribute("aria-label", massStatus);
+      cross.title = massStatus;
+
       const name = document.createElement("strong");
-      name.textContent = church.localName || church.name;
+      name.append(cross, document.createTextNode(church.localName || church.name));
 
       const alternateName = document.createElement("span");
       alternateName.className = "church-search__alternate";
@@ -405,8 +400,8 @@ export function initialiseChurchSearch(map, churches, markerControllers) {
     if (!results.hidden && !input.value.trim()) renderResults();
   };
   window.addEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
-  map.once("remove", () => {
+  return () => {
     window.clearInterval(upcomingMassTimer);
     window.removeEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
-  });
+  };
 }

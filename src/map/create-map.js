@@ -1,28 +1,18 @@
 import { Map, NavigationControl, setWorkerUrl } from "maplibre-gl";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+import { getHomeView, getHomePanBounds, HOME_ORIENTATION, PAN_BOUNDS } from "./home-view.js";
 
 setWorkerUrl(mapLibreWorkerUrl);
-
-export const MALTA_VIEW = {
-  center: [14.385, 35.94],
-  zoom: 10.45,
-  pitch: 50,
-  bearing: -18
-};
-
-const MALTA_BOUNDS = [
-  [13.7, 35.4],
-  [15.07, 36.54]
-];
 
 export function createMaltaMap(container) {
   const map = new Map({
     container,
     style: "https://tiles.openfreemap.org/styles/bright",
-    ...MALTA_VIEW,
-    minZoom: 9.3,
+    center: [14.38, 35.935],
+    ...HOME_ORIENTATION,
+    minZoom: 0,
     maxZoom: 18,
-    maxBounds: MALTA_BOUNDS,
+    maxBounds: PAN_BOUNDS,
     renderWorldCopies: false,
     dragRotate: false,
     pitchWithRotate: false,
@@ -32,6 +22,28 @@ export function createMaltaMap(container) {
     canvasContextAttributes: {
       antialias: true
     }
+  });
+
+  let homeView = getHomeView(map);
+  map.setMaxBounds(getHomePanBounds(map, homeView));
+  map.setMinZoom(homeView.zoom);
+  map.jumpTo(homeView);
+  let atHome = true;
+  map.on("zoomstart", () => { atHome = false; });
+  map.on("dragstart", () => { atHome = false; });
+  map.on("moveend", () => {
+    const center = map.getCenter();
+    atHome = Math.abs(map.getZoom() - homeView.zoom) < 0.001 &&
+      Math.abs(center.lng - homeView.center[0]) < 0.00001 &&
+      Math.abs(center.lat - homeView.center[1]) < 0.00001;
+  });
+  map.on("resize", () => {
+    // Remember the state before resize constraints can shift the camera.
+    const restoreHome = atHome;
+    homeView = getHomeView(map);
+    map.setMaxBounds(getHomePanBounds(map, homeView));
+    map.setMinZoom(homeView.zoom);
+    if (restoreHome) map.jumpTo(homeView);
   });
 
   map.touchZoomRotate.disableRotation();

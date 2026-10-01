@@ -1,36 +1,25 @@
 import { Marker } from "maplibre-gl";
+import { createChurchDetails } from "../ui/church-details.js";
 import {
-  isChurchBookmarked,
-  toggleChurchBookmark
-} from "../data/church-bookmarks.js";
-import { getChurchPhotoUrl } from "../data/church-photos.js";
-import { getMassesInProgress, getUpcomingMasses } from "../data/current-mass.js";
-
-const SHORT_DAY_NAMES = {
-  Monday: "Mon",
-  Tuesday: "Tue",
-  Wednesday: "Wed",
-  Thursday: "Thu",
-  Friday: "Fri",
-  Saturday: "Sat",
-  Sunday: "Sun"
-};
+  getMassesInProgress,
+  getNextMassStartingSoon
+} from "../data/current-mass.js";
 
 const BUBBLE_HOVER_DELAY = 1000;
 const BUBBLE_VISIBLE_DURATION = 5000;
 const BUBBLE_POINTER_SIZE = 18;
 const BUBBLE_POINTER_GAP = 2;
 
-let activeBubbleController = null;
-const bubbleDismissHandlers = new WeakMap();
+const bubbleGroups = new WeakMap();
 
-function ensureBubbleDismissHandler(map) {
+function getBubbleGroup(map) {
   const container = map.getContainer();
 
-  if (bubbleDismissHandlers.has(container)) {
-    return;
+  if (bubbleGroups.has(map)) {
+    return bubbleGroups.get(map);
   }
 
+  const group = { active: null };
   const dismissBubble = (event) => {
     if (
       event.target instanceof Element &&
@@ -41,10 +30,10 @@ function ensureBubbleDismissHandler(map) {
       return;
     }
 
-    activeBubbleController?.close();
+    group.active?.close();
   };
 
-  bubbleDismissHandlers.set(container, dismissBubble);
+  bubbleGroups.set(map, group);
   container.addEventListener("click", dismissBubble);
   map.once("remove", () => {
     container.removeEventListener("click", dismissBubble);
@@ -115,13 +104,6 @@ function createMassTimes(schedule) {
   return wrapper;
 }
 
-function createNextMass(language = "") {
-  const nextMass = document.createElement("p");
-  nextMass.className = "church-mass-bubble__next-mass";
-  nextMass.dataset.language = language;
-  return nextMass;
-}
-
 function createLanguageTabs(church) {
   const tabs = document.createElement("div");
   tabs.className = "church-language-tabs";
@@ -163,10 +145,7 @@ function createLanguageTabs(church) {
     panel.id = panelId;
     panel.setAttribute("role", "tabpanel");
     panel.setAttribute("aria-labelledby", tabId);
-    panel.append(
-      createMassTimes(church.massTimesByLanguage[language]),
-      createNextMass(language)
-    );
+    panel.append(createMassTimes(church.massTimesByLanguage[language]));
 
     tab.addEventListener("pointerdown", (event) => event.stopPropagation());
     tab.addEventListener("click", (event) => {
@@ -304,7 +283,7 @@ function createChurchBubble(church) {
     if (hasLanguageTabs) {
       bubble.append(createLanguageTabs(church));
     } else {
-      bubble.append(createMassTimes(church.massTimes), language, createNextMass());
+      bubble.append(createMassTimes(church.massTimes), language);
     }
   }
 
@@ -340,19 +319,72 @@ export function addChurchMarker(map, church) {
   );
   currentMass.title = "Mass in progress — zoom to church";
 
-  const currentMassIcon = document.createElement("img");
-  currentMassIcon.src = "/favicon.svg";
-  currentMassIcon.alt = "";
+  const currentMassIcon = document.createElement("span");
+  currentMassIcon.className = "current-mass-indicator__pie";
   currentMassIcon.setAttribute("aria-hidden", "true");
-  currentMass.append(currentMassIcon);
+  const startingSoonIcon = document.createElement("img");
+  startingSoonIcon.className = "current-mass-indicator__hourglass";
+  startingSoonIcon.src = "/mass-hourglass.svg";
+  startingSoonIcon.alt = "";
+  startingSoonIcon.setAttribute("aria-hidden", "true");
+  currentMass.append(currentMassIcon, startingSoonIcon);
+
+  // Use a separate map marker so every indicator sits above every cross.
+  const currentMassAnchor = document.createElement("div");
+  currentMassAnchor.className = "current-mass-marker-anchor";
+  currentMassAnchor.append(currentMass);
+  let currentMassMarker;
+  let isVisible = true;
 
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
   let autoDismissTimer;
   let isPinned = false;
+  let hoverPointer;
+
+  const ensureBubble = () => {
+    if (bubble) return;
+
+    details = createChurchDetails(church);
+    bubble = details.element;
+    bubble.addEventListener("pointerdown", pinBubble, { capture: true });
+    bubble.addEventListener("pointerdown", stopMapInteraction);
+    bubble.addEventListener("click", () => onSelect());
+    bubble.addEventListener("keydown", (event) => {
+      if (event.target !== bubble) return;
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onSelect();
+      }
+    });
+    markerAnchor.append(bubble);
+  };
+
+  const updateBubblePointer = () => {
+    if (!bubble || !hoverPointer) return;
+
+    const anchorBounds = markerAnchor.getBoundingClientRect();
+    const edgeInset = 20;
+    const bubbleLeft =
+      anchorBounds.left + anchorBounds.width / 2 - bubble.offsetWidth / 2;
+    const pointerBottom =
+      anchorBounds.bottom -
+      hoverPointer.clientY +
+      BUBBLE_POINTER_GAP +
+      BUBBLE_POINTER_SIZE / Math.sqrt(2);
+    const pointerX = Math.min(
+      bubble.offsetWidth - edgeInset,
+      Math.max(edgeInset, hoverPointer.clientX - bubbleLeft)
+    );
+
+    bubble.style.setProperty("--bubble-pointer-x", `${pointerX}px`);
+    bubble.style.setProperty("--bubble-bottom", `${pointerBottom}px`);
+  };
 
   const focusBubbleAtSide = () => {
     markerAnchor.classList.add("is-bubble-focused");
+    currentMassAnchor.classList.add("is-bubble-focused");
     bubble.classList.add("is-bubble-focused");
     map.getContainer().append(bubble);
   };
@@ -360,32 +392,44 @@ export function addChurchMarker(map, church) {
   const closeBubble = () => {
     window.clearTimeout(hoverTimer);
     window.clearTimeout(autoDismissTimer);
-    bubble.classList.remove("is-bubble-focused");
-    markerAnchor.append(bubble);
+    if (bubble) {
+      bubble.classList.remove("is-bubble-focused");
+      markerAnchor.append(bubble);
+      bubble.style.removeProperty("--bubble-pointer-x");
+      bubble.style.removeProperty("--bubble-bottom");
+    }
     markerAnchor.classList.remove("is-bubble-open");
     markerAnchor.classList.remove("is-bubble-focused");
-    bubble.style.removeProperty("--bubble-pointer-x");
-    bubble.style.removeProperty("--bubble-bottom");
+    currentMassAnchor.classList.remove("is-bubble-open");
+    currentMassAnchor.classList.remove("is-bubble-focused");
     isPinned = false;
 
-    if (markerAnchor.contains(document.activeElement)) {
+    if (
+      markerAnchor.contains(document.activeElement) ||
+      currentMassAnchor.contains(document.activeElement)
+    ) {
       document.activeElement.blur();
     }
 
-    if (activeBubbleController === bubbleController) {
-      activeBubbleController = null;
+    if (bubbleGroup.active === bubbleController) {
+      bubbleGroup.active = null;
     }
   };
 
   const bubbleController = { close: closeBubble };
 
   const openBubble = () => {
-    if (activeBubbleController !== bubbleController) {
-      activeBubbleController?.close();
-      activeBubbleController = bubbleController;
+    ensureBubble();
+    updateCurrentMassStatus();
+    updateBubblePointer();
+
+    if (bubbleGroup.active !== bubbleController) {
+      bubbleGroup.active?.close();
+      bubbleGroup.active = bubbleController;
     }
 
     markerAnchor.classList.add("is-bubble-open");
+    currentMassAnchor.classList.add("is-bubble-open");
     window.clearTimeout(autoDismissTimer);
 
     if (!isPinned) {
@@ -404,12 +448,10 @@ export function addChurchMarker(map, church) {
 
   cross.addEventListener("pointerdown", stopMapInteraction);
   currentMass.addEventListener("pointerdown", stopMapInteraction);
-  bubble.addEventListener("pointerdown", pinBubble, { capture: true });
-  bubble.addEventListener("pointerdown", stopMapInteraction);
   cross.addEventListener("focus", openBubble);
   cross.addEventListener("click", openBubble);
 
-  markerAnchor.addEventListener("pointerenter", (event) => {
+  const handlePointerEnter = (event) => {
     if (event.pointerType !== "mouse") {
       return;
     }
@@ -418,86 +460,48 @@ export function addChurchMarker(map, church) {
       return;
     }
 
+    hoverPointer = { clientX: event.clientX, clientY: event.clientY };
     window.clearTimeout(hoverTimer);
     hoverTimer = window.setTimeout(() => {
       openBubble();
     }, BUBBLE_HOVER_DELAY);
-  });
+  };
 
-  markerAnchor.addEventListener("pointermove", (event) => {
+  const handlePointerMove = (event) => {
     if (
       markerAnchor.classList.contains("is-bubble-open") ||
-      bubble.contains(event.target)
+      bubble?.contains(event.target)
     ) {
       return;
     }
 
-    const anchorBounds = markerAnchor.getBoundingClientRect();
-    const edgeInset = 20;
-    const bubbleLeft =
-      anchorBounds.left + anchorBounds.width / 2 - bubble.offsetWidth / 2;
-    const pointerBottom =
-      anchorBounds.bottom -
-      event.clientY +
-      BUBBLE_POINTER_GAP +
-      BUBBLE_POINTER_SIZE / Math.sqrt(2);
-    const pointerX = Math.min(
-      bubble.offsetWidth - edgeInset,
-      Math.max(edgeInset, event.clientX - bubbleLeft)
-    );
+    hoverPointer = { clientX: event.clientX, clientY: event.clientY };
+    updateBubblePointer();
+  };
 
-    bubble.style.setProperty("--bubble-pointer-x", `${pointerX}px`);
-    bubble.style.setProperty("--bubble-bottom", `${pointerBottom}px`);
-  });
-
-  markerAnchor.addEventListener("pointerleave", () => {
+  const handlePointerLeave = () => {
+    hoverPointer = null;
     window.clearTimeout(hoverTimer);
 
     if (!markerAnchor.classList.contains("is-bubble-open")) {
       closeBubble();
     }
-  });
-
-  const zoomToChurch = () => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    map.flyTo({
-      center: church.coordinates,
-      zoom: map.getMaxZoom(),
-      duration: prefersReducedMotion ? 0 : 1600,
-      essential: !prefersReducedMotion
-    });
   };
 
-  const focusChurch = ({ updateUrl = true } = {}) => {
+  for (const anchor of [markerAnchor, currentMassAnchor]) {
+    anchor.addEventListener("pointerenter", handlePointerEnter);
+    anchor.addEventListener("pointermove", handlePointerMove);
+    anchor.addEventListener("pointerleave", handlePointerLeave);
+  }
+
+  const showDetails = () => {
     pinBubble();
     focusBubbleAtSide();
-    zoomToChurch();
-
-    const churchPath = `/${church.id}`;
-
-    if (updateUrl && window.location.pathname !== churchPath) {
-      window.history.pushState({ churchId: church.id }, "", churchPath);
-    }
   };
 
   currentMass.addEventListener("click", (event) => {
     event.stopPropagation();
-    focusChurch();
-  });
-
-  bubble.addEventListener("click", () => focusChurch());
-  bubble.addEventListener("keydown", (event) => {
-    if (event.target !== bubble) {
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      focusChurch();
-    }
+    onSelect();
   });
 
   const updateCurrentMassStatus = (date = new Date()) => {
@@ -526,25 +530,47 @@ export function addChurchMarker(map, church) {
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
     const hasCurrentMass = activeTimes.size > 0;
-    currentMass.hidden = !hasCurrentMass;
-    markerAnchor.classList.toggle("has-current-mass", hasCurrentMass);
+    const startingSoon = hasCurrentMass
+      ? null
+      : getNextMassStartingSoon(church.masses, date);
+    const hasIndicator = hasCurrentMass || startingSoon !== null;
+    currentMass.hidden = !hasIndicator;
+    currentMassAnchor.hidden = !hasIndicator || !isVisible;
+    currentMassIcon.hidden = !hasCurrentMass;
+    startingSoonIcon.hidden = startingSoon === null;
 
-    bubble.querySelectorAll(".mass-time-entry").forEach((entry) => {
-      const isCurrent =
-        entry.dataset.days.split(",").includes(current.day) &&
-        activeTimes.has(entry.dataset.time);
-      entry.classList.toggle("is-current-mass", isCurrent);
+    if (hasIndicator && !currentMassMarker) {
+      currentMassMarker = new Marker({
+        element: currentMassAnchor,
+        anchor: "center"
+      })
+        .setLngLat(church.coordinates)
+        .addTo(map);
+    } else if (!hasIndicator && currentMassMarker) {
+      currentMassMarker.remove();
+      currentMassMarker = null;
+    }
+    currentMassIcon.style.setProperty(
+      "--mass-remaining",
+      `${current.remainingFraction * 100}%`
+    );
+    const statusLabel = hasCurrentMass
+      ? `Mass in progress at ${church.name}. About ${current.remainingMinutes} ${
+          current.remainingMinutes === 1 ? "minute" : "minutes"
+        } remaining (estimated 60-minute Mass). Zoom to church.`
+      : startingSoon
+        ? `Mass starts in ${startingSoon.minutesUntilStart} ${
+            startingSoon.minutesUntilStart === 1 ? "minute" : "minutes"
+          } at ${church.name} (${startingSoon.mass.time}). Zoom to church.`
+        : `Show Mass times for ${church.name}. Zoom to church.`;
+    currentMass.setAttribute("aria-label", statusLabel);
+    currentMass.title = statusLabel;
 
-      if (isCurrent) {
-        entry.setAttribute("aria-current", "time");
-      } else {
-        entry.removeAttribute("aria-current");
-      }
-    });
+    details?.updateCurrentMass(current);
   };
 
   updateCurrentMassStatus();
-  markerAnchor.append(cross, currentMass, bubble);
+  markerAnchor.append(cross);
 
   const marker = new Marker({
     element: markerAnchor,
@@ -557,11 +583,13 @@ export function addChurchMarker(map, church) {
     churchId: church.id,
     hasMassTimes: church.hasMassTimes,
     marker,
-    focus: focusChurch,
+    showDetails,
     close: closeBubble,
     setVisible(visible) {
       if (!visible) closeBubble();
+      isVisible = visible;
       markerAnchor.hidden = !visible;
+      currentMassAnchor.hidden = !visible || currentMass.hidden;
     },
     updateCurrentMassStatus
   };

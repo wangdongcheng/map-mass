@@ -3,8 +3,10 @@ import "./styles.css";
 import { loadChurches } from "./data/load-churches.js";
 import { addBuildingLayer } from "./map/add-building-layer.js";
 import { addChurchMarker } from "./map/add-church-marker.js";
-import { createMaltaMap, MALTA_VIEW } from "./map/create-map.js";
+import { createMaltaMap } from "./map/create-map.js";
+import { getHomeView } from "./map/home-view.js";
 import { initialiseChurchSearch } from "./ui/church-search.js";
+import { createChurchNavigation } from "./ui/church-navigation.js";
 
 const loading = document.querySelector("#loading");
 const loadingCard = document.querySelector(".loading-card");
@@ -14,8 +16,8 @@ const noMassToggle = document.querySelector("#no-mass-toggle");
 const map = createMaltaMap("map");
 const churchesPromise = loadChurches();
 let churchMarkers = [];
-let churchMarkersById = new Map();
-let showNoMassChurches = true;
+let navigation;
+let showNoMassChurches = false;
 
 function updateNoMassChurchVisibility() {
   churchMarkers.forEach(({ hasMassTimes, setVisible }) => {
@@ -29,57 +31,27 @@ function updateNoMassChurchVisibility() {
     : "Show churches without Mass times";
 }
 
-function getChurchIdFromPath() {
-  return /^\/(\d{4})\/?$/.exec(window.location.pathname)?.[1] ?? null;
-}
-
-function showMaltaView({ updateUrl = true } = {}) {
-  churchMarkers.forEach(({ close }) => close());
-  map.easeTo({
-    ...MALTA_VIEW,
-    duration: 900
-  });
-
-  if (updateUrl && window.location.pathname !== "/") {
-    window.history.pushState(null, "", "/");
-  }
-}
-
-function applyPathToMap() {
-  const churchId = getChurchIdFromPath();
-  const markerController = churchId
-    ? churchMarkersById.get(churchId)
-    : null;
-
-  if (markerController) {
-    markerController.focus({ updateUrl: false });
-    return;
-  }
-
-  showMaltaView({ updateUrl: false });
-
-  if (window.location.pathname !== "/") {
-    window.history.replaceState(null, "", "/");
-  }
-}
-
 map.on("load", async () => {
   addBuildingLayer(map);
 
   try {
     const churches = await churchesPromise;
-    churchMarkers = churches.map((church) => addChurchMarker(map, church));
-    churchMarkersById = new Map(
+    churchMarkers = churches.map((church) =>
+      addChurchMarker(map, church, () => navigation.selectChurch(church.id))
+    );
+    const churchMarkersById = new Map(
       churchMarkers.map((controller) => [controller.churchId, controller])
     );
-    updateNoMassChurchVisibility();
-    initialiseChurchSearch(map, churches, churchMarkersById);
-    const handleHistoryNavigation = () => applyPathToMap();
-    window.addEventListener("popstate", handleHistoryNavigation);
-    map.once("remove", () =>
-      window.removeEventListener("popstate", handleHistoryNavigation)
+    navigation = createChurchNavigation(
+      map,
+      churches,
+      churchMarkersById,
+      () => getHomeView(map)
     );
-    applyPathToMap();
+    updateNoMassChurchVisibility();
+    const disposeSearch = initialiseChurchSearch(churches, navigation);
+    map.once("remove", disposeSearch);
+    navigation.applyPath();
     const refreshCurrentMasses = () => {
       const now = new Date();
       churchMarkers.forEach(({ updateCurrentMassStatus }) =>
@@ -108,7 +80,13 @@ map.on("error", (event) => {
 });
 
 resetView.addEventListener("click", () => {
-  showMaltaView();
+  showNoMassChurches = false;
+  updateNoMassChurchVisibility();
+  if (navigation) {
+    navigation.showHome();
+  } else {
+    map.easeTo({ ...getHomeView(map), duration: 900 });
+  }
 });
 
 noMassToggle.addEventListener("click", () => {

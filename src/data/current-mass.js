@@ -1,4 +1,5 @@
 const MASS_DURATION_MINUTES = 60;
+const STARTING_SOON_MINUTES = 15;
 const DAYS = [
   "Monday",
   "Tuesday",
@@ -50,27 +51,61 @@ function parseTime(time) {
 
 export function getMassesInProgress(masses, date = new Date()) {
   const now = getMaltaDayAndMinute(date);
+  const activeMasses = masses.filter((mass) => {
+    if (mass.day !== now.day) {
+      return false;
+    }
+
+    const start = parseTime(mass.time);
+
+    return (
+      start !== null &&
+      now.minute >= start &&
+      now.minute < start + MASS_DURATION_MINUTES
+    );
+  });
+  const remainingMinutes = activeMasses.length
+    ? Math.min(
+        ...activeMasses.map(
+          (mass) => parseTime(mass.time) + MASS_DURATION_MINUTES - now.minute
+        )
+      )
+    : 0;
 
   return {
     day: now.day,
-    masses: masses.filter((mass) => {
-      if (mass.day !== now.day) {
-        return false;
-      }
-
-      const start = parseTime(mass.time);
-
-      return (
-        start !== null &&
-        now.minute >= start &&
-        now.minute < start + MASS_DURATION_MINUTES
-      );
-    })
+    masses: activeMasses,
+    remainingMinutes,
+    remainingFraction: remainingMinutes / MASS_DURATION_MINUTES
   };
 }
 
 export function isMassInProgress(masses, date = new Date()) {
   return getMassesInProgress(masses, date).masses.length > 0;
+}
+
+export function getNextMassStartingSoon(masses, date = new Date()) {
+  const now = getMaltaDayAndMinute(date);
+  const todayIndex = DAYS.indexOf(now.day);
+  let next = null;
+
+  for (const mass of masses) {
+    const dayIndex = DAYS.indexOf(mass.day);
+    const start = parseTime(mass.time);
+    if (dayIndex === -1 || start === null) continue;
+
+    const dayOffset = (dayIndex - todayIndex + DAYS.length) % DAYS.length;
+    const minutesUntilStart = dayOffset * 24 * 60 + start - now.minute;
+    if (
+      minutesUntilStart > 0 &&
+      minutesUntilStart <= STARTING_SOON_MINUTES &&
+      (!next || minutesUntilStart < next.minutesUntilStart)
+    ) {
+      next = { mass, minutesUntilStart };
+    }
+  }
+
+  return next;
 }
 
 export function getUpcomingMasses(churches, date = new Date(), limit = 8) {
