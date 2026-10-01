@@ -137,7 +137,7 @@ body {
 .church-search__cross {
   position: relative;
   display: inline-block;
-  width: 13px;
+  width: 17px;
   height: 17px;
   margin-right: 7px;
   color: #c9362c;
@@ -145,29 +145,16 @@ body {
 }
 
 .church-search__cross.has-no-mass-times {
-  color: #d97706;
-}
-
-.church-search__cross::before,
-.church-search__cross::after {
-  position: absolute;
-  border-radius: 2px;
-  background: currentcolor;
-  content: "";
+  color: #6b7280;
 }
 
 .church-search__cross::before {
-  top: 0;
-  left: 4px;
-  width: 5px;
-  height: 17px;
-}
-
-.church-search__cross::after {
-  top: 4px;
-  left: 0;
-  width: 13px;
-  height: 5px;
+  position: absolute;
+  inset: 0;
+  background: currentcolor;
+  -webkit-mask: url("/maltese-cross.svg") center / contain no-repeat;
+  mask: url("/maltese-cross.svg") center / contain no-repeat;
+  content: "";
 }
 
 .church-search__heading {
@@ -381,79 +368,56 @@ body {
   right: 16px;
   display: grid;
   width: 29px;
-  height: 40px;
+  height: 58px;
   padding: 0;
   border: 0;
-  border-radius: 13px;
+  border-radius: 999px;
+  overflow: hidden;
+  grid-template-rows: 1fr;
   place-items: center;
-  background: rgb(255 252 244 / 94%);
+  background: #cf142b;
   box-shadow: 0 8px 22px rgb(23 64 78 / 16%);
   cursor: pointer;
-  backdrop-filter: blur(12px);
 }
 
 .no-mass-toggle:hover {
-  background: #fff;
+  filter: brightness(0.94);
 }
 
-.no-mass-toggle.is-active,
-.no-mass-toggle.is-active:hover {
-  background: #d97706;
-  box-shadow: 0 8px 22px rgb(120 63 5 / 24%);
+.no-mass-toggle.is-active {
+  grid-template-rows: 1fr 1fr;
 }
 
 .no-mass-toggle:focus-visible {
-  outline: 3px solid rgb(217 119 6 / 30%);
+  outline: 3px solid rgb(107 114 128 / 30%);
   outline-offset: 2px;
 }
 
 .no-mass-toggle__icon {
   position: relative;
-  width: 18px;
-  height: 22px;
-  opacity: 0.48;
-}
-
-.no-mass-toggle__icon::before,
-.no-mass-toggle__icon::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  border-radius: 2px;
-  background: #d97706;
-  content: "";
-  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: #cf142b;
 }
 
 .no-mass-toggle__icon::before {
-  width: 5px;
+  width: 18px;
   height: 18px;
-}
-
-.no-mass-toggle__icon::after {
-  width: 14px;
-  height: 5px;
-  margin-top: -2px;
-}
-
-.no-mass-toggle.is-active .no-mass-toggle__icon {
-  opacity: 1;
-}
-
-.no-mass-toggle.is-active .no-mass-toggle__icon::before,
-.no-mass-toggle.is-active .no-mass-toggle__icon::after {
   background: #fff;
+  -webkit-mask: url("/maltese-cross.svg") center / contain no-repeat;
+  mask: url("/maltese-cross.svg") center / contain no-repeat;
+  content: "";
 }
 
-.no-mass-toggle:not(.is-active)::after {
-  position: absolute;
-  width: 22px;
-  height: 2px;
-  border-radius: 2px;
-  background: #856047;
-  box-shadow: 0 0 0 1px rgb(255 252 244 / 90%);
-  content: "";
-  transform: rotate(-45deg);
+.no-mass-toggle__icon--gray {
+  display: none;
+  background: #6b7280;
+}
+
+.no-mass-toggle.is-active .no-mass-toggle__icon--gray {
+  display: grid;
 }
 
 .loading {
@@ -573,6 +537,11 @@ body {
   z-index: 20;
 }
 
+/* Keep red crosses above gray crosses, including hovered gray markers. */
+.church-marker-anchor:not(.has-no-mass-times) {
+  z-index: 21;
+}
+
 .church-marker-anchor.is-bubble-open:not(.is-bubble-focused) {
   z-index: 40;
 }
@@ -598,43 +567,34 @@ body {
   border: 0;
   background: transparent;
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.85;
+  filter:
+    drop-shadow(0 1px 0 rgb(80 21 17 / 45%))
+    drop-shadow(0 2px 3px rgb(0 0 0 / 32%));
   transition:
     opacity 130ms ease,
     transform 180ms ease;
 }
 
-.church-cross::before,
-.church-cross::after {
+.church-cross::before {
   position: absolute;
   top: 50%;
   left: 50%;
-  border-radius: 2px;
+  width: 17px;
+  height: 17px;
   background: #c9362c;
-  box-shadow: 0 1px 4px rgb(80 21 17 / 32%);
+  -webkit-mask: url("/maltese-cross.svg") center / contain no-repeat;
+  mask: url("/maltese-cross.svg") center / contain no-repeat;
   content: "";
   transform: translate(-50%, -50%);
 }
 
-.church-marker-anchor.has-no-mass-times .church-cross::before,
-.church-marker-anchor.has-no-mass-times .church-cross::after {
-  background: #d97706;
-  box-shadow: 0 1px 4px rgb(120 63 5 / 32%);
+.church-marker-anchor.has-no-mass-times .church-cross::before {
+  background: #6b7280;
 }
 
 .church-marker-anchor.has-no-mass-times .church-cross:focus-visible {
-  outline-color: rgb(217 119 6 / 38%);
-}
-
-.church-cross::before {
-  width: 5px;
-  height: 17px;
-}
-
-.church-cross::after {
-  width: 13px;
-  height: 5px;
-  margin-top: -2px;
+  outline-color: rgb(107 114 128 / 38%);
 }
 
 .church-cross:focus-visible {
@@ -803,7 +763,7 @@ body {
 }
 
 .church-marker-anchor.is-bubble-focused .church-cross {
-  opacity: 0.7;
+  opacity: 0.85;
   pointer-events: auto;
   transform: scale(1);
 }
