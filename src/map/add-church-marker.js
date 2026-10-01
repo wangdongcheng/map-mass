@@ -306,7 +306,7 @@ function createChurchBubble(church) {
 export function addChurchMarker(map, church) {
   ensureBubbleDismissHandler(map);
 
-  const bubble = createChurchBubble(church);
+  let bubble;
   const markerAnchor = document.createElement("div");
   markerAnchor.className = "church-marker-anchor";
   markerAnchor.classList.toggle("has-no-mass-times", !church.hasMassTimes);
@@ -340,6 +340,46 @@ export function addChurchMarker(map, church) {
   let hoverTimer;
   let autoDismissTimer;
   let isPinned = false;
+  let hoverPointer;
+
+  const ensureBubble = () => {
+    if (bubble) return;
+
+    bubble = createChurchBubble(church);
+    bubble.addEventListener("pointerdown", pinBubble, { capture: true });
+    bubble.addEventListener("pointerdown", stopMapInteraction);
+    bubble.addEventListener("click", () => focusChurch());
+    bubble.addEventListener("keydown", (event) => {
+      if (event.target !== bubble) return;
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        focusChurch();
+      }
+    });
+    markerAnchor.append(bubble);
+  };
+
+  const updateBubblePointer = () => {
+    if (!bubble || !hoverPointer) return;
+
+    const anchorBounds = markerAnchor.getBoundingClientRect();
+    const edgeInset = 20;
+    const bubbleLeft =
+      anchorBounds.left + anchorBounds.width / 2 - bubble.offsetWidth / 2;
+    const pointerBottom =
+      anchorBounds.bottom -
+      hoverPointer.clientY +
+      BUBBLE_POINTER_GAP +
+      BUBBLE_POINTER_SIZE / Math.sqrt(2);
+    const pointerX = Math.min(
+      bubble.offsetWidth - edgeInset,
+      Math.max(edgeInset, hoverPointer.clientX - bubbleLeft)
+    );
+
+    bubble.style.setProperty("--bubble-pointer-x", `${pointerX}px`);
+    bubble.style.setProperty("--bubble-bottom", `${pointerBottom}px`);
+  };
 
   const focusBubbleAtSide = () => {
     markerAnchor.classList.add("is-bubble-focused");
@@ -350,12 +390,14 @@ export function addChurchMarker(map, church) {
   const closeBubble = () => {
     window.clearTimeout(hoverTimer);
     window.clearTimeout(autoDismissTimer);
-    bubble.classList.remove("is-bubble-focused");
-    markerAnchor.append(bubble);
+    if (bubble) {
+      bubble.classList.remove("is-bubble-focused");
+      markerAnchor.append(bubble);
+      bubble.style.removeProperty("--bubble-pointer-x");
+      bubble.style.removeProperty("--bubble-bottom");
+    }
     markerAnchor.classList.remove("is-bubble-open");
     markerAnchor.classList.remove("is-bubble-focused");
-    bubble.style.removeProperty("--bubble-pointer-x");
-    bubble.style.removeProperty("--bubble-bottom");
     isPinned = false;
 
     if (markerAnchor.contains(document.activeElement)) {
@@ -370,6 +412,10 @@ export function addChurchMarker(map, church) {
   const bubbleController = { close: closeBubble };
 
   const openBubble = () => {
+    ensureBubble();
+    updateCurrentMassStatus();
+    updateBubblePointer();
+
     if (activeBubbleController !== bubbleController) {
       activeBubbleController?.close();
       activeBubbleController = bubbleController;
@@ -394,8 +440,6 @@ export function addChurchMarker(map, church) {
 
   cross.addEventListener("pointerdown", stopMapInteraction);
   currentMass.addEventListener("pointerdown", stopMapInteraction);
-  bubble.addEventListener("pointerdown", pinBubble, { capture: true });
-  bubble.addEventListener("pointerdown", stopMapInteraction);
   cross.addEventListener("focus", openBubble);
   cross.addEventListener("click", openBubble);
 
@@ -408,6 +452,7 @@ export function addChurchMarker(map, church) {
       return;
     }
 
+    hoverPointer = { clientX: event.clientX, clientY: event.clientY };
     window.clearTimeout(hoverTimer);
     hoverTimer = window.setTimeout(() => {
       openBubble();
@@ -417,30 +462,17 @@ export function addChurchMarker(map, church) {
   markerAnchor.addEventListener("pointermove", (event) => {
     if (
       markerAnchor.classList.contains("is-bubble-open") ||
-      bubble.contains(event.target)
+      bubble?.contains(event.target)
     ) {
       return;
     }
 
-    const anchorBounds = markerAnchor.getBoundingClientRect();
-    const edgeInset = 20;
-    const bubbleLeft =
-      anchorBounds.left + anchorBounds.width / 2 - bubble.offsetWidth / 2;
-    const pointerBottom =
-      anchorBounds.bottom -
-      event.clientY +
-      BUBBLE_POINTER_GAP +
-      BUBBLE_POINTER_SIZE / Math.sqrt(2);
-    const pointerX = Math.min(
-      bubble.offsetWidth - edgeInset,
-      Math.max(edgeInset, event.clientX - bubbleLeft)
-    );
-
-    bubble.style.setProperty("--bubble-pointer-x", `${pointerX}px`);
-    bubble.style.setProperty("--bubble-bottom", `${pointerBottom}px`);
+    hoverPointer = { clientX: event.clientX, clientY: event.clientY };
+    updateBubblePointer();
   });
 
   markerAnchor.addEventListener("pointerleave", () => {
+    hoverPointer = null;
     window.clearTimeout(hoverTimer);
 
     if (!markerAnchor.classList.contains("is-bubble-open")) {
@@ -478,18 +510,6 @@ export function addChurchMarker(map, church) {
     focusChurch();
   });
 
-  bubble.addEventListener("click", () => focusChurch());
-  bubble.addEventListener("keydown", (event) => {
-    if (event.target !== bubble) {
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      focusChurch();
-    }
-  });
-
   const updateCurrentMassStatus = (date = new Date()) => {
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
@@ -497,7 +517,7 @@ export function addChurchMarker(map, church) {
     currentMass.hidden = !hasCurrentMass;
     markerAnchor.classList.toggle("has-current-mass", hasCurrentMass);
 
-    bubble.querySelectorAll(".mass-time-entry").forEach((entry) => {
+    bubble?.querySelectorAll(".mass-time-entry").forEach((entry) => {
       const isCurrent =
         entry.dataset.days.split(",").includes(current.day) &&
         activeTimes.has(entry.dataset.time);
@@ -512,7 +532,7 @@ export function addChurchMarker(map, church) {
   };
 
   updateCurrentMassStatus();
-  markerAnchor.append(cross, currentMass, bubble);
+  markerAnchor.append(cross, currentMass);
 
   const marker = new Marker({
     element: markerAnchor,
