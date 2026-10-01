@@ -462,8 +462,9 @@ body {
 .email-link {
   display: inline-flex;
   align-items: center;
+  height: 36px;
   border: 1px solid rgb(69 78 73 / 12%);
-  border-radius: 9px;
+  border-radius: 8px;
   color: #52666d;
   background: rgb(255 255 255 / 88%);
   box-shadow: 0 4px 14px rgb(23 64 78 / 14%);
@@ -477,7 +478,7 @@ body {
 
 .powered-by {
   gap: 7px;
-  padding: 5px 8px;
+  padding: 1px 8px;
   text-transform: uppercase;
 }
 
@@ -490,8 +491,8 @@ body {
 .github-link,
 .email-link {
   justify-content: center;
-  width: 34px;
-  padding: 5px;
+  width: 36px;
+  padding: 0;
   color: #24292f;
 }
 
