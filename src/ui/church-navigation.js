@@ -1,4 +1,4 @@
-export function createChurchNavigation(map, churches, markerControllers, homeView) {
+export function createChurchNavigation(map, churches, markerControllers, getHomeView) {
   const churchesById = new Map(churches.map((church) => [church.id, church]));
 
   const closeDetails = () => {
@@ -16,6 +16,7 @@ export function createChurchNavigation(map, churches, markerControllers, homeVie
     map.flyTo({
       center: church.coordinates,
       zoom: map.getMaxZoom(),
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
       duration: reducedMotion ? 0 : 1600,
       essential: !reducedMotion
     });
@@ -29,7 +30,7 @@ export function createChurchNavigation(map, churches, markerControllers, homeVie
 
   const showHome = ({ updateUrl = true } = {}) => {
     closeDetails();
-    map.easeTo({ ...homeView, duration: 900 });
+    map.easeTo({ ...getHomeView(), duration: 900 });
     if (updateUrl && window.location.pathname !== "/") {
       window.history.pushState(null, "", "/");
     }

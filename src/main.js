@@ -3,7 +3,8 @@ import "./styles.css";
 import { loadChurches } from "./data/load-churches.js";
 import { addBuildingLayer } from "./map/add-building-layer.js";
 import { addChurchMarker } from "./map/add-church-marker.js";
-import { createMaltaMap, MALTA_VIEW } from "./map/create-map.js";
+import { createMaltaMap } from "./map/create-map.js";
+import { getHomeView } from "./map/home-view.js";
 import { initialiseChurchSearch } from "./ui/church-search.js";
 import { createChurchNavigation } from "./ui/church-navigation.js";
 
@@ -45,7 +46,7 @@ map.on("load", async () => {
       map,
       churches,
       churchMarkersById,
-      MALTA_VIEW
+      () => getHomeView(map)
     );
     updateNoMassChurchVisibility();
     const disposeSearch = initialiseChurchSearch(churches, navigation);
@@ -84,7 +85,7 @@ resetView.addEventListener("click", () => {
   if (navigation) {
     navigation.showHome();
   } else {
-    map.easeTo({ ...MALTA_VIEW, duration: 900 });
+    map.easeTo({ ...getHomeView(map), duration: 900 });
   }
 });
 

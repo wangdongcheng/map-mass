@@ -43,7 +43,7 @@ function setup(t, { path = "/", reducedMotion = false } = {}) {
     once(type, handler) { this.onRemove = handler; }
   };
   const homeView = { center: [14.385, 35.94], zoom: 10.45 };
-  const navigation = createChurchNavigation(map, churches, controllers, homeView);
+  const navigation = createChurchNavigation(map, churches, controllers, () => ({ ...homeView }));
   return { navigation, map, churches, controllers, shown, closed, history, listeners, window, homeView };
 }
 
@@ -115,4 +115,13 @@ test("unknown church selection leaves map and URL unchanged", (t) => {
   assert.equal(f.map.flight, undefined);
   assert.equal(f.history.length, 0);
   assert.equal(f.shown.length, 0);
+});
+
+test("reset recalculates home for the current viewport", (t) => {
+  const f = setup(t);
+  f.navigation.showHome();
+  f.homeView.zoom = 9.6;
+  f.homeView.center = [14.38, 35.935];
+  f.navigation.showHome();
+  assert.deepEqual(f.map.home, { ...f.homeView, duration: 900 });
 });
