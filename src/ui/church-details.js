@@ -292,7 +292,7 @@ export function createChurchDetails(church) {
           }
 
           const { mass, dayOffset, startMinute } = upcoming;
-          const day = dayOffset === 0 ? "today" : dayOffset === 1 ? "tomorrow" : mass.day;
+          const day = dayOffset === 0 ? "today" : dayOffset === 1 ? "Tomorrow" : mass.day;
           const hour = Math.floor(startMinute / 60);
           const minute = startMinute % 60;
           const minutes = minute ? `:${String(minute).padStart(2, "0")}` : "";

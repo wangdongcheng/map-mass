@@ -105,7 +105,7 @@ test("each language tab shows its next Mass above the map actions", () => {
   const bubble = container.querySelectorAll(".church-mass-bubble")[0];
   const panels = bubble.querySelectorAll(".church-language-panel");
   assert.deepEqual(panels.map((panel) => panel.children.at(-1).textContent), [
-    "Next Mass: tomorrow 9am", "Next Mass: today 6:30pm", "Next Mass: Monday 12pm"
+    "Next Mass: Tomorrow 9am", "Next Mass: today 6:30pm", "Next Mass: Monday 12pm"
   ]);
   bubble.querySelectorAll(".church-language-tab")[1].events.click({ stopPropagation() {} });
   assert.equal(panels[0].hidden, true);
@@ -125,7 +125,7 @@ test("single-language card formats midnight and cards without schedules omit nex
   controller.showDetails();
   controller.updateCurrentMassStatus(new Date("2026-10-01T10:00:00Z"));
   assert.equal(container.querySelectorAll(".church-mass-bubble__next-mass")[0].textContent,
-    "Next Mass: tomorrow 12:05am");
+    "Next Mass: Tomorrow 12:05am");
   const empty = fixture({ languages: [], masses: [] });
   empty.controller.showDetails();
   assert.equal(empty.container.querySelectorAll(".church-mass-bubble__next-mass").length, 0);
