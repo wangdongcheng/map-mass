@@ -37,265 +37,17 @@ function getBubbleGroup(map) {
   container.addEventListener("click", dismissBubble);
   map.once("remove", () => {
     container.removeEventListener("click", dismissBubble);
-    bubbleDismissHandlers.delete(container);
+    group.active?.close();
+    bubbleGroups.delete(map);
   });
+  return group;
 }
 
-function formatDays(dayNames) {
-  if (dayNames.length === 1) {
-    return SHORT_DAY_NAMES[dayNames[0]];
-  }
+export function addChurchMarker(map, church, onSelect) {
+  const bubbleGroup = getBubbleGroup(map);
 
-  return `${SHORT_DAY_NAMES[dayNames[0]]}–${SHORT_DAY_NAMES[dayNames.at(-1)]}`;
-}
-
-function createMassTimes(schedule) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "mass-time-table-wrap";
-
-  const table = document.createElement("table");
-  table.className = "mass-time-table";
-
-  const header = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  schedule.forEach(({ dayNames }) => {
-    const day = document.createElement("th");
-    day.scope = "col";
-    day.textContent = formatDays(dayNames);
-    headerRow.append(day);
-  });
-  header.append(headerRow);
-
-  const body = document.createElement("tbody");
-  const rowCount = Math.max(...schedule.map(({ entries }) => entries.length));
-
-  for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
-    const row = document.createElement("tr");
-
-    schedule.forEach(({ dayNames, entries }) => {
-      const cell = document.createElement("td");
-      const entry = entries[rowIndex];
-
-      if (entry) {
-        const mass = document.createElement("span");
-        mass.className = "mass-time-entry";
-        mass.dataset.days = dayNames.join(",");
-        mass.dataset.time = entry.time;
-        mass.textContent = entry.time;
-
-        if (entry.note) {
-          const note = document.createElement("small");
-          note.textContent = entry.note;
-          mass.append(note);
-        }
-
-        cell.append(mass);
-      }
-
-      row.append(cell);
-    });
-
-    body.append(row);
-  }
-
-  table.append(header, body);
-  wrapper.append(table);
-
-  return wrapper;
-}
-
-function createLanguageTabs(church) {
-  const tabs = document.createElement("div");
-  tabs.className = "church-language-tabs";
-
-  const tabList = document.createElement("div");
-  tabList.className = "church-language-tabs__list";
-  tabList.setAttribute("role", "tablist");
-  tabList.setAttribute("aria-label", "Mass language");
-
-  const tabButtons = [];
-  const panels = [];
-
-  const activateTab = (activeIndex, moveFocus = false) => {
-    tabButtons.forEach((tab, index) => {
-      const isActive = index === activeIndex;
-      tab.setAttribute("aria-selected", String(isActive));
-      tab.tabIndex = isActive ? 0 : -1;
-      panels[index].hidden = !isActive;
-    });
-
-    if (moveFocus) {
-      tabButtons[activeIndex].focus();
-    }
-  };
-
-  church.languages.forEach((language, index) => {
-    const tabId = `${church.id}-language-tab-${index}`;
-    const panelId = `${church.id}-language-panel-${index}`;
-    const tab = document.createElement("button");
-    tab.className = "church-language-tab";
-    tab.type = "button";
-    tab.id = tabId;
-    tab.textContent = language;
-    tab.setAttribute("role", "tab");
-    tab.setAttribute("aria-controls", panelId);
-
-    const panel = document.createElement("div");
-    panel.className = "church-language-panel";
-    panel.id = panelId;
-    panel.setAttribute("role", "tabpanel");
-    panel.setAttribute("aria-labelledby", tabId);
-    panel.append(createMassTimes(church.massTimesByLanguage[language]));
-
-    tab.addEventListener("pointerdown", (event) => event.stopPropagation());
-    tab.addEventListener("click", (event) => {
-      event.stopPropagation();
-      activateTab(index);
-    });
-    tab.addEventListener("keydown", (event) => {
-      let nextIndex;
-
-      if (event.key === "ArrowRight") {
-        nextIndex = (index + 1) % tabButtons.length;
-      } else if (event.key === "ArrowLeft") {
-        nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
-      } else if (event.key === "Home") {
-        nextIndex = 0;
-      } else if (event.key === "End") {
-        nextIndex = tabButtons.length - 1;
-      } else {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      activateTab(nextIndex, true);
-    });
-
-    tabButtons.push(tab);
-    panels.push(panel);
-    tabList.append(tab);
-    tabs.append(panel);
-  });
-
-  tabs.prepend(tabList);
-  activateTab(0);
-
-  return tabs;
-}
-
-function createChurchBubble(church) {
-  const hasMassTimes = church.hasMassTimes;
-  const hasLanguageTabs = hasMassTimes && church.languages.length > 1;
-  const photoUrl = getChurchPhotoUrl(church.id);
-  const [longitude, latitude] = church.coordinates;
-  const bubble = document.createElement("div");
-  bubble.className = "church-mass-bubble";
-  bubble.tabIndex = 0;
-  bubble.setAttribute("role", "group");
-  bubble.setAttribute(
-    "aria-label",
-    hasMassTimes
-      ? `Mass times for ${church.name}, ${church.locality}. Click the card to zoom.`
-      : `Church details for ${church.name}, ${church.locality}. Click the card to zoom.`
-  );
-
-  const eyebrow = document.createElement("span");
-  eyebrow.className = "church-mass-bubble__eyebrow";
-  eyebrow.textContent = `${church.locality} · ${
-    hasMassTimes ? "Mass times" : "Church details"
-  }`;
-
-  const name = document.createElement("strong");
-  name.className = "church-mass-bubble__name";
-  name.textContent =
-    church.localName && church.localName !== church.name
-      ? `${church.name} (${church.localName})`
-      : church.name;
-
-  const type = document.createElement("span");
-  type.className = "church-mass-bubble__type";
-  type.textContent = church.type;
-
-  const language = document.createElement("span");
-  language.className = "church-mass-bubble__language";
-  language.textContent = church.languages.join(" · ");
-
-  const googleMapsLink = document.createElement("a");
-  googleMapsLink.className = "church-mass-bubble__map-link";
-  googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${latitude},${longitude}`
-  )}`;
-  googleMapsLink.target = "_blank";
-  googleMapsLink.rel = "noopener noreferrer";
-  googleMapsLink.textContent = "View in Google Maps";
-  googleMapsLink.setAttribute(
-    "aria-label",
-    `View ${church.name} in Google Maps (opens in a new tab)`
-  );
-  googleMapsLink.addEventListener("click", (event) => event.stopPropagation());
-
-  const bookmarkButton = document.createElement("button");
-  bookmarkButton.className = "church-mass-bubble__bookmark";
-  bookmarkButton.type = "button";
-
-  const updateBookmarkButton = () => {
-    const isBookmarked = isChurchBookmarked(church.id);
-    bookmarkButton.classList.toggle("is-bookmarked", isBookmarked);
-    bookmarkButton.setAttribute("aria-pressed", String(isBookmarked));
-    bookmarkButton.textContent = isBookmarked
-      ? "Bookmarked"
-      : "Add to bookmarks";
-  };
-
-  updateBookmarkButton();
-  bookmarkButton.addEventListener("pointerdown", (event) =>
-    event.stopPropagation()
-  );
-  bookmarkButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    toggleChurchBookmark(church.id);
-    updateBookmarkButton();
-  });
-
-  const actions = document.createElement("div");
-  actions.className = "church-mass-bubble__actions";
-  actions.append(googleMapsLink, bookmarkButton);
-
-  if (photoUrl) {
-    const photo = document.createElement("img");
-    photo.className = "church-mass-bubble__photo";
-    photo.src = photoUrl;
-    photo.alt = `${church.name}, ${church.locality}`;
-    photo.loading = "lazy";
-    photo.decoding = "async";
-    photo.draggable = false;
-    bubble.append(photo);
-  }
-
-  bubble.append(eyebrow, name);
-
-  if (church.type) {
-    bubble.append(type);
-  }
-
-  if (hasMassTimes) {
-    if (hasLanguageTabs) {
-      bubble.append(createLanguageTabs(church));
-    } else {
-      bubble.append(createMassTimes(church.massTimes), language);
-    }
-  }
-
-  bubble.append(actions);
-
-  return bubble;
-}
-
-export function addChurchMarker(map, church) {
-  ensureBubbleDismissHandler(map);
-
-  const bubble = createChurchBubble(church);
+  let bubble;
+  let details;
   const markerAnchor = document.createElement("div");
   markerAnchor.className = "church-marker-anchor";
   markerAnchor.classList.toggle("has-no-mass-times", !church.hasMassTimes);
@@ -505,28 +257,6 @@ export function addChurchMarker(map, church) {
   });
 
   const updateCurrentMassStatus = (date = new Date()) => {
-    const nextMassLabels = bubble.querySelectorAll(".church-mass-bubble__next-mass");
-    if (nextMassLabels.length) {
-      const upcomingMasses = getUpcomingMasses([church], date, church.masses.length);
-      nextMassLabels.forEach((label) => {
-        const upcoming = upcomingMasses.find(
-          ({ mass }) => !label.dataset.language || mass.language === label.dataset.language
-        );
-
-        if (!upcoming) {
-          label.textContent = "Next Mass: unavailable";
-          return;
-        }
-
-        const { mass, dayOffset, startMinute } = upcoming;
-        const day = dayOffset === 0 ? "today" : dayOffset === 1 ? "tomorrow" : mass.day;
-        const hour = Math.floor(startMinute / 60);
-        const minute = startMinute % 60;
-        const time = `${hour % 12 || 12}${minute ? `:${String(minute).padStart(2, "0")}` : ""}${hour < 12 ? "am" : "pm"}`;
-        label.textContent = `Next Mass: ${day} ${time}`;
-      });
-    }
-
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
     const hasCurrentMass = activeTimes.size > 0;
@@ -566,7 +296,7 @@ export function addChurchMarker(map, church) {
     currentMass.setAttribute("aria-label", statusLabel);
     currentMass.title = statusLabel;
 
-    details?.updateCurrentMass(current);
+    details?.updateCurrentMass(current, date);
   };
 
   updateCurrentMassStatus();
