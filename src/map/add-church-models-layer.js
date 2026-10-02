@@ -2,6 +2,7 @@ import { MercatorCoordinate } from "maplibre-gl";
 import * as THREE from "three";
 import { churchModelRegistry } from "./church-models/index.js";
 import { disposeModel } from "./church-models/shared/dispose-model.js";
+import { getMapNightAmount } from "./map-atmosphere.js";
 
 const LAYER_ID = "church-3d-models";
 
@@ -19,7 +20,8 @@ function findFirstLabelLayer(map) {
 function createScene(model) {
   const scene = new THREE.Scene();
   scene.add(model);
-  scene.add(new THREE.HemisphereLight(0xfff8e8, 0x69717a, 2.3));
+  const ambient = new THREE.HemisphereLight(0xfff8e8, 0x69717a, 2.3);
+  scene.add(ambient);
 
   const sun = new THREE.DirectionalLight(0xfff2d4, 3.1);
   sun.position.set(-40, -50, 85).normalize();
@@ -29,7 +31,21 @@ function createScene(model) {
   fill.position.set(30, 35, 35).normalize();
   scene.add(fill);
 
+  scene.userData.lighting = { ambient, sun, fill, nightAmount: 0 };
+
   return scene;
+}
+
+function updateSceneLighting(scene, amount) {
+  const lighting = scene.userData.lighting;
+  if (lighting.nightAmount === amount) return;
+  lighting.nightAmount = amount;
+  lighting.ambient.color.copy(new THREE.Color(0xfff8e8)).lerp(new THREE.Color(0x9ebbe1), amount);
+  lighting.ambient.intensity = 2.3 - 1.55 * amount;
+  lighting.sun.color.copy(new THREE.Color(0xfff2d4)).lerp(new THREE.Color(0xd2e5ff), amount);
+  lighting.sun.intensity = 3.1 - 0.5 * amount;
+  lighting.sun.position.set(-40, -50, 85).lerp(new THREE.Vector3(-85, -35, 28), amount).normalize();
+  lighting.fill.intensity = 1.15 - 0.9 * amount;
 }
 
 function createTransform(coordinates, altitude, scale) {
@@ -83,6 +99,7 @@ function createChurchModelsLayer(churches) {
 
     render(gl, args) {
       const zoom = this.map.getZoom();
+      const nightAmount = getMapNightAmount(this.map);
       const projection = new THREE.Matrix4().fromArray(
         args.defaultProjectionData.mainMatrix
       );
@@ -94,6 +111,7 @@ function createChurchModelsLayer(churches) {
           return;
         }
 
+        updateSceneLighting(entry.scene, nightAmount);
         this.camera.projectionMatrix = projection.clone().multiply(entry.transform);
         this.renderer.render(entry.scene, this.camera);
       });

@@ -4,6 +4,7 @@ import { loadChurches } from "./data/load-churches.js";
 import { addBuildingLayer } from "./map/add-building-layer.js";
 import { addChurchMarker } from "./map/add-church-marker.js";
 import { createMaltaMap } from "./map/create-map.js";
+import { initialiseMapAtmosphere } from "./map/map-atmosphere.js";
 import { getHomeView } from "./map/home-view.js";
 import { initialiseChurchSearch } from "./ui/church-search.js";
 import { createChurchNavigation } from "./ui/church-navigation.js";
@@ -33,6 +34,7 @@ function updateNoMassChurchVisibility() {
 
 map.on("load", async () => {
   addBuildingLayer(map);
+  initialiseMapAtmosphere(map);
 
   try {
     const churches = await churchesPromise;
