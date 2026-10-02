@@ -1,4 +1,14 @@
 :root {
+  /* Global order: markers < map controls < details < search < loading. */
+  --layer-marker: 10;
+  --layer-marker-hover: 11;
+  --layer-marker-with-mass: 20;
+  --layer-current-mass: 30;
+  --layer-map-controls: 40;
+  --layer-details: 50;
+  --layer-search: 60;
+  --layer-loading: 70;
+
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
@@ -30,7 +40,7 @@ body {
 
 .church-search {
   position: fixed;
-  z-index: 40;
+  z-index: var(--layer-search);
   top: 18px;
   left: 18px;
   width: min(390px, calc(100vw - 92px));
@@ -331,7 +341,7 @@ body {
 
 .reset-view {
   position: fixed;
-  z-index: 10;
+  z-index: var(--layer-map-controls);
   top: 82px;
   right: 16px;
   display: grid;
@@ -363,7 +373,7 @@ body {
 
 .no-mass-toggle {
   position: fixed;
-  z-index: 40;
+  z-index: var(--layer-map-controls);
   top: 130px;
   right: 16px;
   display: grid;
@@ -422,7 +432,7 @@ body {
 
 .loading {
   position: fixed;
-  z-index: 11;
+  z-index: var(--layer-loading);
   inset: 0;
   display: grid;
   place-items: center;
@@ -449,7 +459,7 @@ body {
 
 .map-footer-links {
   position: fixed;
-  z-index: 10;
+  z-index: var(--layer-map-controls);
   left: 10px;
   bottom: 28px;
   display: flex;
@@ -528,27 +538,28 @@ body {
   position: absolute;
   width: 24px;
   height: 24px;
-  z-index: 1;
+  z-index: var(--layer-marker);
 }
 
 .church-marker-anchor:hover,
 .church-marker-anchor:focus-within,
 .church-marker-anchor.is-bubble-open {
-  z-index: 20;
+  z-index: var(--layer-marker-hover);
 }
 
 /* Keep red crosses above gray crosses, including hovered gray markers. */
 .church-marker-anchor:not(.has-no-mass-times) {
-  z-index: 21;
+  z-index: var(--layer-marker-with-mass);
 }
 
-.church-marker-anchor.is-bubble-open:not(.is-bubble-focused) {
-  z-index: 40;
+.church-marker-anchor.is-bubble-open:not(.is-bubble-focused),
+.church-marker-anchor:focus-within:not(.is-bubble-focused) {
+  z-index: var(--layer-details);
 }
 
 .current-mass-marker-anchor {
   position: absolute;
-  z-index: 30;
+  z-index: var(--layer-current-mass);
   width: 24px;
   height: 24px;
   pointer-events: none;
@@ -745,7 +756,7 @@ body {
 .church-mass-bubble.is-bubble-focused,
 .church-mass-bubble.is-bubble-focused:hover {
   position: absolute;
-  z-index: 40;
+  z-index: var(--layer-details);
   top: 50%;
   right: 24px;
   bottom: auto;
@@ -1093,6 +1104,13 @@ body {
   98% {
     transform: translateX(-50%) rotate(4deg);
   }
+}
+
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+  z-index: var(--layer-map-controls);
 }
 
 .maplibregl-ctrl-group {
