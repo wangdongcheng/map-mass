@@ -384,8 +384,10 @@ body {
   cursor: pointer;
 }
 
-.reset-view:hover {
-  background: #a5122a;
+@media (hover: hover) and (pointer: fine) {
+  .reset-view:hover {
+    background: #a5122a;
+  }
 }
 
 .reset-view:active {
