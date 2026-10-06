@@ -186,6 +186,7 @@ body {
 
 .church-search__cross::before {
   position: absolute;
+  z-index: 1;
   inset: 0;
   background: currentcolor;
   -webkit-mask: url("/maltese-cross.svg") center / contain no-repeat;
@@ -617,6 +618,7 @@ body {
 
 .church-cross::before {
   position: absolute;
+  z-index: 1;
   top: 50%;
   left: 50%;
   width: 17px;
@@ -624,6 +626,20 @@ body {
   background: #c9362c;
   -webkit-mask: url("/maltese-cross.svg") center / contain no-repeat;
   mask: url("/maltese-cross.svg") center / contain no-repeat;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.church-cross::after,
+.church-search__cross::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 19.04px;
+  height: 19.04px;
+  background: #fff;
+  -webkit-mask: url("/maltese-cross-outline.svg") center / contain no-repeat;
+  mask: url("/maltese-cross-outline.svg") center / contain no-repeat;
   content: "";
   transform: translate(-50%, -50%);
 }
