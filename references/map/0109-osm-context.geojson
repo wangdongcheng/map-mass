@@ -1,0 +1,566 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              14.437494277954102,
+              35.896885535142246
+            ],
+            [
+              14.437671303749084,
+              35.89680731479031
+            ],
+            [
+              14.437633752822876,
+              35.896750822265886
+            ],
+            [
+              14.437456727027893,
+              35.896829042673616
+            ],
+            [
+              14.437494277954102,
+              35.896885535142246
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "render_height": 4,
+        "render_min_height": 0,
+        "layer": "building"
+      },
+      "id": "4021318140-0"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              14.437612295150757,
+              35.897102813492
+            ],
+            [
+              14.437826871871948,
+              35.897068048996104
+            ],
+            [
+              14.4378000497818,
+              35.89696375541686
+            ],
+            [
+              14.437585473060608,
+              35.896998519958544
+            ],
+            [
+              14.437612295150757,
+              35.897102813492
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "render_height": 5,
+        "render_min_height": 0,
+        "layer": "building"
+      },
+      "id": "67691410-102"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              14.4375479221344,
+              35.897267944638955
+            ],
+            [
+              14.437606930732727,
+              35.89724621687613
+            ],
+            [
+              14.43753182888031,
+              35.89718537910852
+            ],
+            [
+              14.437510371208191,
+              35.89720276133262
+            ],
+            [
+              14.4375479221344,
+              35.897267944638955
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "render_height": 5,
+        "render_min_height": 0,
+        "layer": "building"
+      },
+      "id": "67691410-103"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              14.437649846076965,
+              35.89743742098419
+            ],
+            [
+              14.437714219093323,
+              35.89743307544141
+            ],
+            [
+              14.437698125839233,
+              35.89731574569613
+            ],
+            [
+              14.437639117240906,
+              35.897320091245376
+            ],
+            [
+              14.437649846076965,
+              35.89743742098419
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "render_height": 5,
+        "render_min_height": 0,
+        "layer": "building"
+      },
+      "id": "67691410-104"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              14.437596201896667,
+              35.89697244655372
+            ],
+            [
+              14.437719583511353,
+              35.89695071870979
+            ],
+            [
+              14.437703490257263,
+              35.89689422628767
+            ],
+            [
+              14.437580108642578,
+              35.89691595414712
+            ],
+            [
+              14.437596201896667,
+              35.89697244655372
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "render_height": 8,
+        "render_min_height": 0,
+        "layer": "building"
+      },
+      "id": "1552887940-6"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.43678081035614,
+            35.8965509253172
+          ],
+          [
+            14.437338709831238,
+            35.89697244655372
+          ],
+          [
+            14.437590837478638,
+            35.897172342437955
+          ]
+        ]
+      },
+      "properties": {
+        "surface": "paved",
+        "class": "minor",
+        "layer": "transportation"
+      },
+      "id": "228861300-23"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.438100457191467,
+            35.89734616453569
+          ],
+          [
+            14.437977075576782,
+            35.8974156932679
+          ]
+        ]
+      },
+      "properties": {
+        "class": "service",
+        "layer": "transportation"
+      },
+      "id": "472044340-19"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.437590837478638,
+            35.897172342437955
+          ],
+          [
+            14.437644481658936,
+            35.89723318021558
+          ],
+          [
+            14.437606930732727,
+            35.897298363496844
+          ],
+          [
+            14.437665939331055,
+            35.89758951483127
+          ],
+          [
+            14.437649846076965,
+            35.89789804716622
+          ]
+        ]
+      },
+      "properties": {
+        "class": "track",
+        "layer": "transportation"
+      },
+      "id": "1427098390-37"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.43751573562622,
+            35.89731140014669
+          ],
+          [
+            14.437317252159119,
+            35.89737223781742
+          ],
+          [
+            14.437140226364136,
+            35.89757647822728
+          ],
+          [
+            14.437129497528076,
+            35.897685116528436
+          ],
+          [
+            14.437209963798523,
+            35.89777637258619
+          ],
+          [
+            14.437317252159119,
+            35.89780244572623
+          ],
+          [
+            14.437419176101685,
+            35.897789409157284
+          ],
+          [
+            14.437606930732727,
+            35.897706844170784
+          ]
+        ]
+      },
+      "properties": {
+        "class": "track",
+        "layer": "transportation"
+      },
+      "id": "1427098390-38"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.438384771347046,
+            35.897298363496844
+          ],
+          [
+            14.437590837478638,
+            35.897172342437955
+          ]
+        ]
+      },
+      "properties": {
+        "surface": "paved",
+        "class": "minor",
+        "oneway": 1,
+        "layer": "transportation"
+      },
+      "id": 228859272
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.437590837478638,
+            35.897172342437955
+          ],
+          [
+            14.437977075576782,
+            35.8974156932679
+          ],
+          [
+            14.438379406929016,
+            35.8979588843861
+          ]
+        ]
+      },
+      "properties": {
+        "surface": "paved",
+        "class": "minor",
+        "oneway": 1,
+        "layer": "transportation"
+      },
+      "id": 228859302
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.437590837478638,
+            35.897172342437955
+          ],
+          [
+            14.437644481658936,
+            35.89723318021558
+          ],
+          [
+            14.437606930732727,
+            35.897298363496844
+          ],
+          [
+            14.437665939331055,
+            35.89758951483127
+          ],
+          [
+            14.437649846076965,
+            35.89789804716622
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Trejqet Annibale Preca",
+        "name_int": "Trejqet Annibale Preca",
+        "class": "track",
+        "name:latin": "Trejqet Annibale Preca",
+        "name_de": "Trejqet Annibale Preca",
+        "name_en": "Trejqet Annibale Preca",
+        "layer": "transportation_name"
+      },
+      "id": 3644519322
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.43678081035614,
+            35.8965509253172
+          ],
+          [
+            14.437338709831238,
+            35.89697244655372
+          ],
+          [
+            14.437590837478638,
+            35.897172342437955
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Triq il-Kappella tal-Mirakli",
+        "name_int": "Triq il-Kappella tal-Mirakli",
+        "class": "minor",
+        "name:latin": "Triq il-Kappella tal-Mirakli",
+        "name_de": "Triq il-Kappella tal-Mirakli",
+        "name_en": "Triq il-Kappella tal-Mirakli",
+        "layer": "transportation_name"
+      },
+      "id": "228858860-1"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.438384771347046,
+            35.897298363496844
+          ],
+          [
+            14.437590837478638,
+            35.897172342437955
+          ]
+        ]
+      },
+      "properties": {
+        "name_int": "Triq Annibale Preca",
+        "route_1_name": "Three Villages Walk",
+        "name_de": "Triq Annibale Preca",
+        "name": "Triq Annibale Preca",
+        "route_1_network": "lwn",
+        "class": "minor",
+        "name:latin": "Triq Annibale Preca",
+        "name_en": "Triq Annibale Preca",
+        "layer": "transportation_name"
+      },
+      "id": 228859270
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            14.437590837478638,
+            35.897172342437955
+          ],
+          [
+            14.437977075576782,
+            35.8974156932679
+          ],
+          [
+            14.438379406929016,
+            35.8979588843861
+          ]
+        ]
+      },
+      "properties": {
+        "name_int": "Triq il-Mitħna",
+        "route_1_name": "Three Villages Walk",
+        "name_de": "Triq il-Mitħna",
+        "name": "Triq il-Mitħna",
+        "route_1_network": "lwn",
+        "class": "minor",
+        "name:latin": "Triq il-Mitħna",
+        "name_en": "Triq il-Mitħna",
+        "layer": "transportation_name"
+      },
+      "id": "228859300-0"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.437633752822876,
+          35.89713323241338
+        ]
+      },
+      "properties": {
+        "name_int": "Ħal Lija - Preca",
+        "name_de": "Ħal Lija - Preca",
+        "name": "Ħal Lija - Preca",
+        "subclass": "bus_stop",
+        "rank": 2,
+        "class": "bus",
+        "name:latin": "Ħal Lija - Preca",
+        "name_en": "Ħal Lija - Preca",
+        "layer": "poi"
+      },
+      "id": 50219139651
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.437708854675293,
+          35.89703328448495
+        ]
+      },
+      "properties": {
+        "name_int": "Il-Knisja tal-Madonna tal-Mirakli",
+        "name_de": "Il-Knisja tal-Madonna tal-Mirakli",
+        "name": "Il-Knisja tal-Madonna tal-Mirakli",
+        "subclass": "christian",
+        "rank": 7,
+        "class": "place_of_worship",
+        "name:latin": "Il-Knisja tal-Madonna tal-Mirakli",
+        "name_en": "Il-Knisja tal-Madonna tal-Mirakli",
+        "layer": "poi"
+      },
+      "id": 2223433732
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.437971711158752,
+          35.89730270904704
+        ]
+      },
+      "properties": {
+        "subclass": "park",
+        "class": "park",
+        "rank": 12,
+        "layer": "poi"
+      },
+      "id": 5451909592
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          14.43777322769165,
+          35.89678993247941
+        ]
+      },
+      "properties": {
+        "subclass": "playground",
+        "class": "playground",
+        "rank": 43,
+        "layer": "poi"
+      },
+      "id": 13684171852
+    }
+  ]
+}

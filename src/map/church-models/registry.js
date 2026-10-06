@@ -2,6 +2,7 @@ import { churchModel0006 } from "./0006/config.js";
 import { churchModel0023 } from "./0023/config.js";
 import { churchModel0042 } from "./0042/config.js";
 import { churchModel0046 } from "./0046/config.js";
+import { churchModel0109 } from "./0109/config.js";
 import { churchModel0230 } from "./0230/config.js";
 import { churchModel0246 } from "./0246/config.js";
 import { churchModel0260 } from "./0260/config.js";
@@ -11,6 +12,7 @@ export const churchModelRegistry = new Map([
   [churchModel0023.churchId, churchModel0023],
   [churchModel0042.churchId, churchModel0042],
   [churchModel0046.churchId, churchModel0046],
+  [churchModel0109.churchId, churchModel0109],
   [churchModel0230.churchId, churchModel0230],
   [churchModel0246.churchId, churchModel0246],
   [churchModel0260.churchId, churchModel0260]
