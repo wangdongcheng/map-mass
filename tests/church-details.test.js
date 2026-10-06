@@ -36,6 +36,12 @@ class FakeElement {
   removeAttribute(key) { delete this.attributes[key]; }
   addEventListener(key, handler) { this.events[key] = handler; }
   removeEventListener(key) { delete this.events[key]; }
+  showModal() { this.open = true; }
+  close() { this.open = false; this.events.close?.(); }
+  remove() {
+    if (this.parent) this.parent.children = this.parent.children.filter((child) => child !== this);
+    this.parent = null;
+  }
   contains(node) { return this === node || this.children.some((child) => child.contains(node)); }
   querySelectorAll(selector) {
     return this.children.flatMap((child) => [
@@ -45,19 +51,21 @@ class FakeElement {
   }
 }
 
-function fixture({ languages = ["English", "Maltese", "Italian"], masses } = {}) {
+function fixture({ languages = ["English", "Maltese", "Italian"], masses, photoUrl = null, photoUrls = photoUrl ? [photoUrl] : [] } = {}) {
   class Marker {
     constructor({ element }) { this.element = element; }
     setLngLat() { return this; }
     addTo() { return this; }
     remove() {}
   }
+  const body = new FakeElement("body");
   const context = vm.createContext({
     Marker, Element: FakeElement,
     getMassesInProgress, getNextMassStartingSoon, getUpcomingMasses,
     isChurchBookmarked: () => false,
-    toggleChurchBookmark() {}, getChurchPhotoUrl: () => null,
-    document: { createElement: (tag) => new FakeElement(tag), activeElement: null },
+    toggleChurchBookmark() {}, getChurchPhotoUrl: () => photoUrl,
+    getChurchPhotoUrls: () => photoUrls,
+    document: { body, createElement: (tag) => new FakeElement(tag), activeElement: null },
     window: { clearTimeout() {}, setTimeout() {} }
   });
   for (const path of ["../src/ui/church-details.js", "../src/map/add-church-marker.js"]) {
@@ -83,8 +91,79 @@ function fixture({ languages = ["English", "Maltese", "Italian"], masses } = {})
   };
   let selections = 0;
   const controller = context.addChurchMarker(map, church, () => selections++);
-  return { controller, container, removalHandlers, getSelections: () => selections };
+  return { controller, container, body, removalHandlers, getSelections: () => selections };
 }
+
+test("photo click opens the full source without selecting the church and cleans up on dismissal", () => {
+  const photoUrl = "/photos/test.jpg";
+  const { controller, container, body, getSelections } = fixture({ photoUrl });
+  controller.showDetails();
+  const button = container.querySelectorAll(".church-mass-bubble__photo-button")[0];
+  assert.equal(button.tag, "button");
+  assert.equal(button.attributes["aria-haspopup"], "dialog");
+  let stopped = false;
+  const open = () => button.events.click({ stopPropagation() { stopped = true; } });
+  open();
+  assert.equal(stopped, true);
+  assert.equal(getSelections(), 0);
+  const dialog = body.children[0];
+  assert.equal(dialog.tag, "dialog");
+  assert.equal(dialog.open, true);
+  const photo = dialog.querySelectorAll(".church-photo-viewer__image")[0];
+  assert.equal(photo.src, photoUrl);
+  assert.equal(photo.alt, "Test, Malta");
+  assert.equal(dialog.querySelectorAll(".church-photo-viewer__next").length, 0);
+  dialog.events.click({ target: photo });
+  assert.equal(dialog.open, true);
+  dialog.querySelectorAll(".church-photo-viewer__close")[0].events.click();
+  assert.equal(body.children.length, 0);
+  open();
+  body.children[0].events.click({ target: body.children[0] });
+  assert.equal(body.children.length, 0);
+  open();
+  body.children[0].close(); // Native dialog Escape dismissal dispatches close.
+  assert.equal(body.children.length, 0);
+});
+
+test("gallery starts on the card photo and cycles through photos with buttons and arrow keys", () => {
+  const photoUrls = ["/photos/cover.jpg", "/photos/original.jpg", "/photos/side.png"];
+  const { controller, container, body, getSelections } = fixture({
+    photoUrl: photoUrls[0], photoUrls
+  });
+  controller.showDetails();
+  container.querySelectorAll(".church-mass-bubble__photo-button")[0]
+    .events.click({ stopPropagation() {} });
+  const dialog = body.children[0];
+  const photo = dialog.querySelectorAll(".church-photo-viewer__image")[0];
+  const counter = dialog.querySelectorAll(".church-photo-viewer__counter")[0];
+  const next = dialog.querySelectorAll(".church-photo-viewer__next")[0];
+  const previous = dialog.querySelectorAll(".church-photo-viewer__previous")[0];
+  assert.equal(photo.src, photoUrls[0]);
+  assert.equal(counter.textContent, "1 / 3");
+  previous.events.click();
+  assert.equal(photo.src, photoUrls[2]);
+  assert.equal(counter.textContent, "3 / 3");
+  next.events.click();
+  next.events.click();
+  assert.equal(photo.src, photoUrls[1]);
+  for (const [key, expected] of [["ArrowRight", 2], ["ArrowLeft", 1]]) {
+    let prevented = false;
+    let stopped = false;
+    dialog.events.keydown({ key,
+      preventDefault() { prevented = true; }, stopPropagation() { stopped = true; }
+    });
+    assert.equal(photo.src, photoUrls[expected]);
+    assert.equal(prevented, true);
+    assert.equal(stopped, true);
+  }
+  dialog.events.keydown({ key: "Tab" });
+  assert.equal(photo.src, photoUrls[1]);
+  assert.equal(getSelections(), 0);
+  dialog.close();
+  container.querySelectorAll(".church-mass-bubble__photo-button")[0]
+    .events.click({ stopPropagation() {} });
+  assert.equal(body.children[0].querySelectorAll(".church-photo-viewer__image")[0].src, photoUrls[0]);
+});
 
 test("marker initializes before lazy details and preserves selection and removal lifecycle", () => {
   const { controller, container, removalHandlers, getSelections } = fixture();

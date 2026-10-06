@@ -2,7 +2,7 @@ import {
   isChurchBookmarked,
   toggleChurchBookmark
 } from "../data/church-bookmarks.js";
-import { getChurchPhotoUrl } from "../data/church-photos.js";
+import { getChurchPhotoUrl, getChurchPhotoUrls } from "../data/church-photos.js";
 import { getUpcomingMasses } from "../data/current-mass.js";
 
 const SHORT_DAY_NAMES = {
@@ -83,6 +83,69 @@ function createNextMass(language = "") {
   label.className = "church-mass-bubble__next-mass";
   label.dataset.language = language;
   return label;
+}
+
+function showChurchPhoto(photoUrls, description) {
+  const dialog = document.createElement("dialog");
+  dialog.className = "church-photo-viewer";
+  dialog.setAttribute("aria-label", `Photo of ${description}`);
+
+  const photo = document.createElement("img");
+  photo.className = "church-photo-viewer__image";
+  photo.src = photoUrls[0];
+  photo.alt = description;
+  photo.draggable = false;
+
+  if (photoUrls.length > 1) {
+    let photoIndex = 0;
+    const counter = document.createElement("span");
+    counter.className = "church-photo-viewer__counter";
+    counter.setAttribute("role", "status");
+    counter.setAttribute("aria-live", "polite");
+    const updatePhoto = (offset) => {
+      photoIndex = (photoIndex + offset + photoUrls.length) % photoUrls.length;
+      photo.src = photoUrls[photoIndex];
+      counter.textContent = `${photoIndex + 1} / ${photoUrls.length}`;
+    };
+
+    for (const [direction, offset, label, symbol] of [
+      ["previous", -1, "Previous photo", "\u2039"],
+      ["next", 1, "Next photo", "\u203a"]
+    ]) {
+      const button = document.createElement("button");
+      button.className = `church-photo-viewer__${direction}`;
+      button.type = "button";
+      button.textContent = symbol;
+      button.setAttribute("aria-label", label);
+      button.addEventListener("click", () => updatePhoto(offset));
+      dialog.append(button);
+    }
+
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      event.stopPropagation();
+      updatePhoto(event.key === "ArrowLeft" ? -1 : 1);
+    });
+    updatePhoto(0);
+    dialog.append(counter);
+  }
+
+  const closeButton = document.createElement("button");
+  closeButton.className = "church-photo-viewer__close";
+  closeButton.type = "button";
+  closeButton.textContent = "\u00d7";
+  closeButton.setAttribute("aria-label", "Close photo");
+  closeButton.autofocus = true;
+  closeButton.addEventListener("click", () => dialog.close());
+
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener("close", () => dialog.remove(), { once: true });
+  dialog.append(photo, closeButton);
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 function createLanguageTabs(church) {
@@ -247,6 +310,18 @@ export function createChurchDetails(church) {
   actions.append(googleMapsLink, bookmarkButton);
 
   if (photoUrl) {
+    const photoButton = document.createElement("button");
+    photoButton.className = "church-mass-bubble__photo-button";
+    photoButton.type = "button";
+    photoButton.setAttribute("aria-label", `View full photo of ${church.name}`);
+    photoButton.setAttribute("aria-haspopup", "dialog");
+    photoButton.title = "View full photo";
+    photoButton.addEventListener("pointerdown", (event) => event.stopPropagation());
+    photoButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      showChurchPhoto(getChurchPhotoUrls(church.id), `${church.name}, ${church.locality}`);
+    });
+
     const photo = document.createElement("img");
     photo.className = "church-mass-bubble__photo";
     photo.src = photoUrl;
@@ -254,7 +329,8 @@ export function createChurchDetails(church) {
     photo.loading = "lazy";
     photo.decoding = "async";
     photo.draggable = false;
-    bubble.append(photo);
+    photoButton.append(photo);
+    bubble.append(photoButton);
   }
 
   bubble.append(eyebrow, name);
