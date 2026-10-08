@@ -1,8 +1,8 @@
-# Map Mass
+# MASS NOW
 
 ![Illustration of Malta and Gozo with church markers](public/og-image.png)
 
-Map Mass is a map-first web application for finding Catholic churches and Mass times across Malta and Gozo. It combines a stylized 2.5D island map with a normalized church schedule, live Mass status, church search, bookmarks, photos, and selected custom 3D church models.
+MASS NOW is a map-first web application for finding Catholic churches and Mass times across Malta and Gozo. It combines a stylized 2.5D island map with a normalized church schedule, live Mass status, church search, bookmarks, photos, and selected custom 3D church models.
 
 The application is a static, client-side Vite project. It has no backend or account system: church and schedule data are bundled with the build, while bookmarks are stored in the browser.
 
@@ -233,13 +233,13 @@ Deep links such as `/0042` require the host to serve `index.html` as the fallbac
 
 ## Attribution
 
-Map Mass uses MapLibre GL JS, OpenFreeMap, and map data derived from OpenStreetMap. Production attribution must remain visible and comply with the requirements of the map, tile, schedule-data, and church-photo sources.
+MASS NOW uses MapLibre GL JS, OpenFreeMap, and map data derived from OpenStreetMap. Production attribution must remain visible and comply with the requirements of the map, tile, schedule-data, and church-photo sources.
 
 The island overview uses public domain geoBoundaries Malta coastline geometry. The pinned source and attribution are documented in [references/map/README.md](references/map/README.md).
 
 ## 中文简介
 
-Map Mass 是一个以地图为核心的网页应用，用于查找马耳他和戈佐岛的天主教堂及弥撒时间。项目为纯前端静态应用，不需要账户；教堂和弥撒数据随项目构建，收藏则保存在当前浏览器中。
+MASS NOW 是一个以地图为核心的网页应用，用于查找马耳他和戈佐岛的天主教堂及弥撒时间。项目为纯前端静态应用，不需要账户；教堂和弥撒数据随项目构建，收藏则保存在当前浏览器中。
 
 ### 主要功能
 
