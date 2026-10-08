@@ -21,7 +21,7 @@ The application is a static, client-side Vite project. It has no backend or acco
 - Local browser bookmarks, shown in the empty-search menu.
 - Church detail cards with photos, church type, language tabs, weekly schedules, notes, and Google Maps links.
 - Deep links using four-digit church paths such as `/0042`.
-- Custom Three.js church models for church IDs `0006`, `0023`, `0042`, `0046`, `0057`, `0109`, `0177`, `0230`, `0246`, and `0260`.
+- Custom Three.js church models for church IDs `0006`, `0023`, `0042`, `0046`, `0047`, `0057`, `0109`, `0177`, `0230`, `0246`, and `0260`.
 - Responsive desktop and mobile layouts and reduced-motion-aware map transitions.
 
 ## How the interface works
