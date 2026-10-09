@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getChurchesInView, getMapListEntries } from "../src/data/map-church-list.js";
-import { filterChurches } from "../src/data/church-filters.js";
+import { createChurchFilterStore, filterChurches } from "../src/data/church-filters.js";
 
 const filters = { language: "", region: "", dayMode: "any", date: "", from: "", to: "", showNoMass: false };
 const mass = (day, time, language = "English") => ({ day, time, language });
@@ -12,6 +12,23 @@ const churches = [
   church("empty", [14.4, 35.9], [])
 ];
 const now = new Date("2026-10-09T07:30:00Z"); // 09:30 in Malta.
+
+test("no-Mass toggle refreshes the region and viewport list while retaining empty schedules", () => {
+  const store = createChurchFilterStore(churches);
+  const updates = [];
+  const unsubscribe = store.subscribe(snapshot => {
+    const visible = getChurchesInView(snapshot.churches, () => ({ x: 50, y: 50 }), { width: 100, height: 100 });
+    updates.push(getMapListEntries(visible, snapshot.filters, now));
+  });
+  store.update({ region: "malta" });
+  store.update({ showNoMass: true });
+  store.update({ showNoMass: false });
+  assert.deepEqual(updates.map(entries => entries.map(entry => entry.church.id)), [["east"], ["east", "empty"], ["east"]]);
+  assert.equal(updates[1][0].church.hasMassTimes, true);
+  assert.equal(updates[1][1].church.hasMassTimes, false);
+  assert.deepEqual(updates[1][1].times, []);
+  unsubscribe();
+});
 
 test("viewport membership follows screen projection for a pitched and rotated map", () => {
   const positions = new Map([[churches[0].coordinates, { x: -1, y: 100 }], [churches[1].coordinates, { x: 390, y: 844 }], [churches[2].coordinates, { x: 80, y: -5 }]]);

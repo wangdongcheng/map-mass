@@ -48,7 +48,7 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
     });
     count.textContent = `${churches.length} ${churches.length === 1 ? "church" : "churches"} in map view`;
     const entries = getMapListEntries(churches, snapshot.filters);
-    const key = JSON.stringify([snapshot.error, entries.map(({ church, times }) => [church.id, times.map(t => [t.date, t.dayOffset, t.mass.day, t.mass.time, t.mass.language])])]);
+    const key = JSON.stringify([snapshot.error, entries.map(({ church, times }) => [church.id, church.hasMassTimes, times.map(t => [t.date, t.dayOffset, t.mass.day, t.mass.time, t.mass.language])])]);
     if (key === renderKey) return;
     renderKey = key;
     const scrollTop = content.scrollTop;
@@ -65,9 +65,15 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
       item.type = "button";
       item.className = "map-church-list__item";
       item.dataset.churchId = church.id;
-      item.setAttribute("aria-label", `Show details for ${church.localName || church.name}`);
+      const massStatus = church.hasMassTimes ? "Mass times available" : "No Mass times listed";
+      item.setAttribute("aria-label", `Show details for ${church.localName || church.name}. ${massStatus}`);
+      const cross = document.createElement("span");
+      cross.className = "map-church-list__cross";
+      cross.classList.toggle("has-no-mass-times", !church.hasMassTimes);
+      cross.setAttribute("aria-hidden", "true");
+      cross.title = massStatus;
       const name = document.createElement("strong");
-      name.textContent = church.localName || church.name;
+      name.append(cross, document.createTextNode(church.localName || church.name));
       const locality = document.createElement("span");
       locality.className = "map-church-list__locality";
       locality.textContent = church.locality;
