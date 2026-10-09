@@ -419,6 +419,7 @@ export function initialiseChurchSearch(churches, navigation, filterStore) {
     if (!results.hidden && !input.value.trim()) renderResults();
   };
   window.addEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
+  document.addEventListener("church-list-open", closeResults);
   const unsubscribeFilters = filterStore?.subscribe(snapshot => {
     availableChurches = snapshot.churches;
     index = availableChurches.map(createSearchEntry);
@@ -428,6 +429,7 @@ export function initialiseChurchSearch(churches, navigation, filterStore) {
     if (!results.hidden || (changed && hasActiveFilters(snapshot.filters))) renderResults();
   });
   return () => {
+    document.removeEventListener("church-list-open", closeResults);
     unsubscribeFilters?.();
     window.clearInterval(upcomingMassTimer);
     window.removeEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);

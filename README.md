@@ -104,6 +104,10 @@ Supported extensions are `.jpg`, `.jpeg`, `.png`, `.webp`, and `.avif`. The fold
 
 The search toolbar's **Filters** panel filters map markers and search results together by Mass language, island (Malta or Gozo & Comino), today or a selected date, and start-time bounds. From and Until use hour selections from `00` to `23`, interpreted at the start of the selected hour; when both are set, Until must be greater than From. Conditions match the same Mass session; the filtered list shows its matching times. Dates and times use Europe/Malta, and selected dates follow the bundled weekly timetable rather than holiday exceptions. Clear filters to return to all scheduled churches; the whole-island reset also clears filters. Churches without listed times can be shown with the existing switch when no Mass schedule filters are active.
 
+## Mobile map and list
+
+On phones (up to 640 px wide), a bottom panel switches between **Map** and **List**. Drag its handle to snap between collapsed, half-open and expanded heights, or use the handle button and arrow keys. The list follows the current map camera and global filters, using projected on-screen church positions so tilted and rotated views do not include off-screen points. It shows upcoming Masses, or matching sessions on the selected date, and opens the existing church details when a row is selected. The list scrolls independently; opening search or filters collapses it, and opening the list dismisses search overlays. Desktop layout remains unchanged.
+
 ## Custom 3D church models
 
 Custom models are implemented as lightweight Three.js geometry rather than external model files. Each model has its own directory:

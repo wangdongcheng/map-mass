@@ -49,14 +49,20 @@ export function initialiseChurchFilters(churches, store) {
     toggle.setAttribute("aria-expanded", String(!panel.hidden));
   };
   const onClear = () => store.clear();
+  const onListOpen = () => {
+    panel.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+  };
   const clear = panel.querySelector("#filter-clear");
   toggle.disabled = false;
   toggle.addEventListener("click", onToggle);
   panel.addEventListener("change", onChange);
   clear.addEventListener("click", onClear);
+  document.addEventListener("church-list-open", onListOpen);
   const unsubscribe = store.subscribe(render);
   render(store.getSnapshot());
   return () => {
+    document.removeEventListener("church-list-open", onListOpen);
     unsubscribe();
     toggle.removeEventListener("click", onToggle);
     panel.removeEventListener("change", onChange);

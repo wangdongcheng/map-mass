@@ -10,6 +10,7 @@ import { initialiseChurchSearch } from "./ui/church-search.js";
 import { createChurchNavigation } from "./ui/church-navigation.js";
 import { createChurchFilterStore, getFilterDate, getMaltaDate, hasScheduleFilters } from "./data/church-filters.js";
 import { initialiseChurchFilters } from "./ui/church-filters.js";
+import { initialiseMapChurchList } from "./ui/map-church-list.js";
 
 const loading = document.querySelector("#loading");
 const loadingCard = document.querySelector(".loading-card");
@@ -75,6 +76,7 @@ map.on("load", async () => {
     updateNoMassChurchVisibility();
     const disposeSearch = initialiseChurchSearch(churches, navigation, filterStore);
     map.once("remove", disposeSearch);
+    map.once("remove", initialiseMapChurchList(map, navigation, filterStore));
     navigation.applyPath();
     const refreshCurrentMasses = () => {
       filterStore.refresh();

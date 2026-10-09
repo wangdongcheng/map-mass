@@ -92,6 +92,18 @@
       ></div>
     </div>
 
+    <section class="map-church-list" id="map-church-list" aria-label="Churches in the current map view" data-level="0" hidden>
+      <button id="map-list-handle" class="map-church-list__handle" type="button" aria-controls="map-list-content" aria-expanded="false" aria-label="Open church list. Drag up to expand."><span aria-hidden="true"></span></button>
+      <div class="map-church-list__toolbar">
+        <span id="map-list-count" role="status" aria-live="polite"></span>
+        <div class="map-church-list__switch" role="group" aria-label="Map or list view">
+          <button id="map-list-map" type="button" aria-pressed="true">Map</button>
+          <button id="map-list-list" type="button" aria-pressed="false">List</button>
+        </div>
+      </div>
+      <div id="map-list-content" class="map-church-list__content" role="region" aria-label="Churches and Mass times" hidden></div>
+    </section>
+
     <button
       class="reset-view"
       id="reset-view"
