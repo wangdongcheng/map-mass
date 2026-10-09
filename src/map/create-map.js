@@ -11,7 +11,7 @@ export function createMaltaMap(container) {
     center: [14.38, 35.935],
     ...HOME_ORIENTATION,
     minZoom: 0,
-    maxZoom: 18,
+    maxZoom: 20,
     maxBounds: PAN_BOUNDS,
     renderWorldCopies: false,
     dragRotate: false,

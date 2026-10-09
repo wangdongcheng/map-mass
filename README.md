@@ -38,7 +38,7 @@ The red reset button returns to this fitted overview, closes church details, res
 
 Every church with valid coordinates has a map marker. Churches with Mass schedules use red crosses; churches without schedules use orange crosses, hidden by default. The toggle below the reset control shows or hides the orange markers. Those churches remain available through search and direct links while their map markers are hidden.
 
-Clicking or focusing a cross opens its detail bubble immediately; hovering with a mouse opens it after about one second. An unpinned bubble closes after about five seconds. Clicking the card or selecting the church from search zooms to the maximum map zoom of `18`, centres the church, pins the card to the right side of the viewport, and updates the URL. Clicking the map background dismisses the open card.
+Clicking or focusing a cross opens its detail bubble immediately; hovering with a mouse opens it after about one second. An unpinned bubble closes after about five seconds. Clicking the card or selecting the church from search zooms to the maximum map zoom of `20`, centres the church, pins the card to the right side of the viewport, and updates the URL. Clicking the map background dismisses the open card.
 
 A red-and-white pie indicator appears above a church while a Mass is in progress. Its white remaining-time slice shrinks as the red elapsed portion grows clockwise from the top. Hovering over the indicator shows an estimated number of minutes remaining. If Masses overlap at one church, the estimate follows the earliest ending active Mass. An hourglass appears during the 15 minutes before the next Mass starts and switches to the pie at the start. Clicking either indicator selects the church directly. A Mass in progress takes priority over an upcoming Mass.
 
@@ -263,7 +263,7 @@ MASS NOW 是一个以地图为核心的网页应用，用于查找马耳他和�
 
 ### 基本用法
 
-在地图上点击红色十字标记会立即打开教堂信息气泡；使用鼠标时，也可以在红十字上悬停约 1 秒打开气泡。若没有继续操作，未固定的气泡会在约 5 秒后自动关闭。点击气泡后，地图会缩放到最大级别 `18` 并居中到该教堂，详情卡会固定在页面右侧，同时网址会更新为该教堂的四位编号链接。通过顶部搜索框、即将开始的弥撒列表或收藏选择教堂，也会触发相同的定位和详情展示效果。点击地图背景可关闭当前详情卡。
+在地图上点击红色十字标记会立即打开教堂信息气泡；使用鼠标时，也可以在红十字上悬停约 1 秒打开气泡。若没有继续操作，未固定的气泡会在约 5 秒后自动关闭。点击气泡后，地图会缩放到最大级别 `20` 并居中到该教堂，详情卡会固定在页面右侧，同时网址会更新为该教堂的四位编号链接。通过顶部搜索框、即将开始的弥撒列表或收藏选择教堂，也会触发相同的定位和详情展示效果。点击地图背景可关闭当前详情卡。
 
 没有弥撒时间的教堂使用橙色十字标记，默认隐藏；点击重置按钮下方的开关可显示这些标记。即使标记隐藏，也能通过搜索或教堂链接打开其详情。
 

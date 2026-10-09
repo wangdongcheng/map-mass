@@ -37,7 +37,7 @@ function setup(t, { path = "/", reducedMotion = false } = {}) {
     close: () => closed.push(id)
   }]));
   const map = {
-    getMaxZoom: () => 18,
+    getMaxZoom: () => 20,
     flyTo(options) { this.flight = options; },
     easeTo(options) { this.home = options; },
     once(type, handler) { this.onRemove = handler; }
@@ -52,7 +52,7 @@ test("selecting a church shows its card, moves the map and updates URL once", (t
   assert.equal(f.navigation.selectChurch("0001"), true);
   assert.deepEqual(f.shown, ["0001"]);
   assert.deepEqual(f.map.flight.center, f.churches[0].coordinates);
-  assert.equal(f.map.flight.zoom, 18);
+  assert.equal(f.map.flight.zoom, 20);
   assert.equal(f.map.flight.duration, 1600);
   assert.deepEqual(f.history[0], {
     method: "pushState", state: { churchId: "0001" }, pathname: "/0001"
