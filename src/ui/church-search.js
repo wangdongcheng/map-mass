@@ -115,6 +115,7 @@ export function initialiseChurchSearch(churches, navigation, filterStore) {
   const selectChurch = (church) => {
     input.value = church.localName || church.name;
     closeResults();
+    document.dispatchEvent(new CustomEvent("church-search-select"));
 
     navigation.selectChurch(church.id);
   };

@@ -49,20 +49,29 @@ export function initialiseChurchFilters(churches, store) {
     toggle.setAttribute("aria-expanded", String(!panel.hidden));
   };
   const onClear = () => store.clear();
-  const onListOpen = () => {
+  const closePanel = () => {
     panel.hidden = true;
     toggle.setAttribute("aria-expanded", "false");
+  };
+  const onOutsideInteraction = event => {
+    if (!panel.contains(event.target) && !toggle.contains(event.target)) closePanel();
   };
   const clear = panel.querySelector("#filter-clear");
   toggle.disabled = false;
   toggle.addEventListener("click", onToggle);
   panel.addEventListener("change", onChange);
   clear.addEventListener("click", onClear);
-  document.addEventListener("church-list-open", onListOpen);
+  document.addEventListener("church-list-open", closePanel);
+  document.addEventListener("church-search-select", closePanel);
+  document.addEventListener("pointerdown", onOutsideInteraction, true);
+  document.addEventListener("click", onOutsideInteraction, true);
   const unsubscribe = store.subscribe(render);
   render(store.getSnapshot());
   return () => {
-    document.removeEventListener("church-list-open", onListOpen);
+    document.removeEventListener("church-list-open", closePanel);
+    document.removeEventListener("church-search-select", closePanel);
+    document.removeEventListener("pointerdown", onOutsideInteraction, true);
+    document.removeEventListener("click", onOutsideInteraction, true);
     unsubscribe();
     toggle.removeEventListener("click", onToggle);
     panel.removeEventListener("change", onChange);
