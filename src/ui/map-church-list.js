@@ -5,6 +5,9 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
   const handle = sheet.querySelector("#map-list-handle");
   const mapButton = sheet.querySelector("#map-list-map");
   const listButton = sheet.querySelector("#map-list-list");
+  const desktopSwitch = document.querySelector("#desktop-map-list-switch");
+  const desktopMapButton = desktopSwitch.querySelector("#map-list-desktop-map");
+  const desktopListButton = desktopSwitch.querySelector("#map-list-desktop-list");
   const content = sheet.querySelector("#map-list-content");
   const count = sheet.querySelector("#map-list-count");
   const media = window.matchMedia("(max-width: 640px)");
@@ -28,10 +31,10 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
     content.hidden = level === 0;
     handle.setAttribute("aria-expanded", String(level > 0));
     handle.setAttribute("aria-label", level === 0 ? "Open church list. Drag up to expand." : "Resize church list. Drag down to show map.");
-    mapButton.setAttribute("aria-pressed", String(level === 0));
-    listButton.setAttribute("aria-pressed", String(level > 0));
+    for (const button of [mapButton, desktopMapButton]) button.setAttribute("aria-pressed", String(level === 0));
+    for (const button of [listButton, desktopListButton]) button.setAttribute("aria-pressed", String(level > 0));
     applyHeight();
-    if (level === 0 && content.contains(document.activeElement)) listButton.focus({ preventScroll: true });
+    if (level === 0 && content.contains(document.activeElement)) (media.matches ? listButton : desktopListButton).focus({ preventScroll: true });
     if (wasCollapsed && level > 0) {
       navigation.closeDetails();
       document.dispatchEvent(new CustomEvent("church-list-open"));
@@ -39,7 +42,6 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
   };
 
   const render = () => {
-    if (!media.matches) return;
     const container = map.getContainer();
     const churches = getChurchesInView(snapshot.churches, coordinates => map.project(coordinates), {
       width: container.clientWidth, height: container.clientHeight
@@ -99,6 +101,8 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
   const listen = (element, event, listener) => element.addEventListener(event, listener, { signal: events.signal });
   listen(mapButton, "click", () => setLevel(0));
   listen(listButton, "click", () => setLevel(1));
+  listen(desktopMapButton, "click", () => setLevel(0));
+  listen(desktopListButton, "click", () => setLevel(1));
   listen(content, "click", event => {
     const item = event.target.closest("[data-church-id]");
     if (!item) return;
@@ -113,7 +117,7 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
     }
   });
   listen(sheet, "keydown", event => {
-    if (event.key === "Escape") { setLevel(0); listButton.focus(); }
+    if (event.key === "Escape") { setLevel(0); (media.matches ? listButton : desktopListButton).focus(); }
   });
   listen(handle, "pointerdown", event => {
     if (!event.isPrimary || event.button !== 0) return;
@@ -155,6 +159,7 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
   map.on("resize", resize);
   const unsubscribe = filterStore.subscribe(next => { snapshot = next; render(); });
   sheet.hidden = false;
+  desktopSwitch.hidden = false;
   setLevel(0);
   render();
   return () => {
@@ -164,5 +169,6 @@ export function initialiseMapChurchList(map, navigation, filterStore) {
     map.off("moveend", render);
     map.off("resize", resize);
     sheet.hidden = true;
+    desktopSwitch.hidden = true;
   };
 }

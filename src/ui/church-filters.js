@@ -5,6 +5,7 @@ export function initialiseChurchFilters(churches, store) {
   const toggle = document.querySelector("#filter-toggle");
   const summary = document.querySelector("#filter-summary");
   const error = document.querySelector("#filter-error");
+  const results = document.querySelector("#church-search-results");
   const fields = Object.fromEntries(["language", "region", "dayMode", "date", "from", "to"].map(key => [key, panel.querySelector(`[name="${key}"]`)]));
   for (const field of [fields.from, fields.to]) {
     for (let hour = 0; hour < 24; hour++) {
@@ -54,6 +55,9 @@ export function initialiseChurchFilters(churches, store) {
     toggle.setAttribute("aria-expanded", "false");
   };
   const onOutsideInteraction = event => {
+    // Keep the option under the pointer until selection completes. Collapsing
+    // on pointerdown moves the results before pointerup can generate its click.
+    if (results.contains(event.target) && event.target.closest?.('[role="option"]')) return;
     if (!panel.contains(event.target) && !toggle.contains(event.target)) closePanel();
   };
   const clear = panel.querySelector("#filter-clear");
