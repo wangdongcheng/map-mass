@@ -8,7 +8,7 @@ import { disposeModel } from "../src/map/church-models/shared/dispose-model.js";
 
 test("0109 body fits the OSM footprint and its entrance faces the road bend", () => {
   assert.equal(churchModelRegistry.get("0109"), churchModel0109);
-  const context = JSON.parse(readFileSync(new URL("../references/map/0109-osm-context.geojson", import.meta.url), "utf8"));
+  const context = JSON.parse(readFileSync(new URL("../references/map/0109/0109-osm-context.geojson", import.meta.url), "utf8"));
   const corners = context.features.find(({ id }) => id === "67691410-102").geometry.coordinates[0].slice(0, 4);
   const [lng, lat] = churchModel0109.coordinates;
   const metres = ([longitude, latitude]) => new THREE.Vector2(

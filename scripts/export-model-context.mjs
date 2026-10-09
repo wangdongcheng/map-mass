@@ -64,8 +64,8 @@ for (const id of ids) {
     }
   }
   if (!features.some((f) => f.properties.source_layer === "building")) throw new Error(`No buildings for ${id}`);
-  await mkdir("references/map", { recursive: true });
-  await writeFile(`references/map/${id}-osm-context.geojson`, JSON.stringify({
+  await mkdir(`references/map/${id}`, { recursive: true });
+  await writeFile(`references/map/${id}/${id}-osm-context.geojson`, JSON.stringify({
     type: "FeatureCollection", source: sources[0], sources, fetched_at: new Date().toISOString(),
     attribution: "Map data © OpenStreetMap contributors, ODbL: https://www.openstreetmap.org/copyright",
     description: "OpenFreeMap vector-tile features intersecting a query box extending 160 m from the centre in each direction. Complete intersecting features are retained. Tile/component IDs are not OSM way IDs.",

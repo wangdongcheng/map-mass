@@ -8,7 +8,7 @@ import { disposeModel } from "../src/map/church-models/shared/dispose-model.js";
 
 test("0177 fits the map footprint with its entrance SE, tower left and dome at the rear", () => {
   assert.equal(churchModelRegistry.get("0177"), churchModel0177);
-  const context = JSON.parse(readFileSync(new URL("../references/map/0177-osm-context.geojson", import.meta.url), "utf8"));
+  const context = JSON.parse(readFileSync(new URL("../references/map/0177/0177-osm-context.geojson", import.meta.url), "utf8"));
   const corners = context.features.find(({ id }) => id === "35098320-281").geometry.coordinates[0].slice(0, 4);
   const [lng, lat] = churchModel0177.coordinates;
   const metres = ([longitude, latitude]) => new THREE.Vector2(

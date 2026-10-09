@@ -11,7 +11,18 @@ coastline, including small offshore islands, against the resulting camera.
 
 ## Church model references
 
-Every registered church model has three files in this directory:
+Every registered church model has its own four-digit church ID directory under
+`references/map/`, containing three files. For example:
+
+```text
+references/map/0202/
+  0202-model-notes.md
+  0202-model-preview.png
+  0202-osm-context.geojson
+```
+
+The shared `malta-boundary.geojson` and this guide remain in `references/map/`.
+Each church directory contains:
 
 - `<id>-model-notes.md`: supplied image references, placement, orientation,
   architectural interpretation and the limits of the source evidence.
@@ -41,8 +52,8 @@ node scripts/render-model-previews.mjs 0202
 ```
 
 Use Node.js 22 or newer for these maintenance scripts. Both commands accept
-multiple four-digit church IDs and overwrite their target
-files. The context exporter downloads the current OpenFreeMap snapshot and
+multiple four-digit church IDs, create their directories as needed, and overwrite
+their target files in `references/map/<id>/`. The context exporter downloads the current OpenFreeMap snapshot and
 pins its URLs in the output; review the notes and footprint tests after any
 refresh. It uses the model's configured coordinates, falling back to the
 workbook marker. The preview renderer starts a local Vite server and headless

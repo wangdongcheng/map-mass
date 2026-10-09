@@ -8,7 +8,7 @@ import { disposeModel } from "../src/map/church-models/shared/dispose-model.js";
 
 test("0047 fits its footprint with twin front towers, an SE entrance and a dome behind the facade", () => {
   assert.equal(churchModelRegistry.get("0047"), churchModel0047);
-  const context = JSON.parse(readFileSync(new URL("../references/map/0047-osm-context.geojson", import.meta.url), "utf8"));
+  const context = JSON.parse(readFileSync(new URL("../references/map/0047/0047-osm-context.geojson", import.meta.url), "utf8"));
   const corners = context.features.find(({ id }) => id === "35098320-79").geometry.coordinates[0].slice(0, 4);
   const [lng, lat] = churchModel0047.coordinates;
   const metres = ([longitude, latitude]) => new THREE.Vector2(

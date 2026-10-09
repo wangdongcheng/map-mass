@@ -64,8 +64,8 @@ try {
   });
   await send("Page.enable");
   await send("Runtime.enable");
-  await mkdir("references/map", { recursive: true });
   for (const id of ids) {
+    await mkdir(`references/map/${id}`, { recursive: true });
     await send("Page.navigate", { url: `${origin}/__model-preview?id=${encodeURIComponent(id)}` });
     let preview;
     for (let attempt = 0; attempt < 120; attempt++) {
@@ -77,7 +77,7 @@ try {
     if (preview?.error) throw new Error(preview.error);
     if (!preview?.png || preview.id !== id) throw new Error(`Rendering timed out for ${id}`);
     const png = Buffer.from(preview.png.split(",")[1], "base64");
-    await writeFile(`references/map/${id}-model-preview.png`, png);
+    await writeFile(`references/map/${id}/${id}-model-preview.png`, png);
     console.log(`${id}: ${preview.width} × ${preview.height}, ${png.length} bytes`);
   }
 } finally {

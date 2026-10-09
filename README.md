@@ -149,7 +149,8 @@ The main startup flow is:
 ```text
 public/                         Static branding and favicon assets
 references/church-photos/       Runtime church photos and modeling references
-references/map/                 Source coastline geometry and attribution
+references/map/                 Shared coastline geometry and reference guide
+  <church-id>/                  Model notes, preview PNG and OSM context per church
 src/
   data/                         Workbook normalization, schedules, photos, bookmarks
   map/

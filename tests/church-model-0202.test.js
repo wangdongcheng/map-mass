@@ -8,7 +8,7 @@ import { disposeModel } from "../src/map/church-models/shared/dispose-model.js";
 
 test("0202 fits the complete F-shaped school and chapel footprint with a WNW church entrance", () => {
   assert.equal(churchModelRegistry.get("0202"), churchModel0202);
-  const context = JSON.parse(readFileSync(new URL("../references/map/0202-osm-context.geojson", import.meta.url), "utf8"));
+  const context = JSON.parse(readFileSync(new URL("../references/map/0202/0202-osm-context.geojson", import.meta.url), "utf8"));
   const footprint = context.features.find(({ id }) => id === "building:26569630-1473");
   assert.ok(footprint, "the chapel must have a pinned source in the connected school footprint");
   const [lng, lat] = churchModel0202.coordinates;

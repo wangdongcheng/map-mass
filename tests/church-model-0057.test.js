@@ -8,7 +8,7 @@ import { disposeModel } from "../src/map/church-models/shared/dispose-model.js";
 
 test("0057 follows the mapped church outline and faces Sir Temi Zammit Avenue", () => {
   assert.equal(churchModelRegistry.get("0057"), churchModel0057);
-  const context = JSON.parse(readFileSync(new URL("../references/map/0057-osm-context.geojson", import.meta.url), "utf8"));
+  const context = JSON.parse(readFileSync(new URL("../references/map/0057/0057-osm-context.geojson", import.meta.url), "utf8"));
   const footprint = context.features.find(({ id }) => id === "building-71555740-856").geometry.coordinates[0].slice(0, -1);
   const [lng, lat] = churchModel0057.coordinates;
   const metres = ([longitude, latitude]) => new THREE.Vector2(
