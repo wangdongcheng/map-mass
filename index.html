@@ -66,6 +66,23 @@
           disabled
         />
       </div>
+      <div class="church-filter-bar">
+        <button id="filter-toggle" type="button" aria-expanded="false" aria-controls="church-filters" disabled>Filters</button>
+        <span id="filter-summary" role="status" aria-live="polite"></span>
+      </div>
+      <section id="church-filters" class="church-filters" aria-label="Filter churches and Mass times" hidden>
+        <div class="church-filters__grid">
+          <label>Language<select name="language"><option value="">All languages</option></select></label>
+          <label>Island<select name="region"><option value="">All islands</option><option value="malta">Malta</option><option value="gozo">Gozo &amp; Comino</option></select></label>
+          <label>Day<select name="dayMode"><option value="any">Any day</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="next-sunday">Next Sunday</option><option value="date">Choose date</option></select></label>
+          <label hidden>Date<input name="date" type="date" /></label>
+          <label>From<select name="from" aria-describedby="filter-error"><option value="">Any hour</option></select></label>
+          <label>Until<select name="to" aria-describedby="filter-error"><option value="">Any hour</option></select></label>
+        </div>
+        <p id="filter-error" role="alert" hidden></p>
+        <p class="church-filters__hint">Malta local time · Weekly timetable. Holiday changes may apply.</p>
+        <button id="filter-clear" type="button">Clear filters</button>
+      </section>
       <div
         class="church-search__results"
         id="church-search-results"

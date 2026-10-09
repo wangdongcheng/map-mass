@@ -8,6 +8,10 @@
 
 ## 2026-10-09
 
+- 日期筛选增加 Tomorrow 和 Next Sunday，按 Malta 当地日期计算；Next Sunday 指最近的周日，今天若为周日则筛选今天，未来日期隐藏实时弥撒状态。
+- 时间筛选 From / Until 改为 `00–23` 小时选项，Until 必须严格大于 From；Filters 激活按钮改用与重置按钮一致的红底白字及悬停、按下配色。
+- 新增全局筛选：按语言、今天或指定日期、开始时间范围及 Malta / Gozo & Comino 同步筛选地图标记和搜索列表，显示匹配场次与结果数量；日期使用 Malta 当地时间和每周时间表，提供校验、清除筛选及手机布局。实时弥撒图标遵循匹配场次，查看其他日期时隐藏实时状态。
+
 - 新增教堂 `0106`（Gozo 的 Lunzjata / Annunciation of Our Lady）3D 模型，按固定 OSM 轮廓校准位置，加入拱门、圆窗、十字架、平屋顶、较高后部附属体及入口围墙；生成建模说明、实际模型预览和 OSM 上下文三个参考文件。50 项测试与生产构建通过。
 
 > church 0106 modeling, 需要生成references\map 的对应三个文件，commit to main。

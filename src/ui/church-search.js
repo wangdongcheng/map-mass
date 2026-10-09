@@ -3,6 +3,7 @@ import {
   getBookmarkedChurchIds
 } from "../data/church-bookmarks.js";
 import { getUpcomingMasses } from "../data/current-mass.js";
+import { hasActiveFilters } from "../data/church-filters.js";
 
 const MAX_RESULTS = 8;
 const UPCOMING_TIME_SLOT_COUNT = 5;
@@ -65,15 +66,17 @@ function getMatches(index, value) {
     .map(({ entry }) => entry.church);
 }
 
-export function initialiseChurchSearch(churches, navigation) {
+export function initialiseChurchSearch(churches, navigation, filterStore) {
   const container = document.querySelector("#church-search");
   const input = document.querySelector("#church-search-input");
   const results = document.querySelector("#church-search-results");
-  const index = churches.map(createSearchEntry);
+  let availableChurches = filterStore?.getSnapshot().churches ?? churches;
+  let index = availableChurches.map(createSearchEntry);
   const churchesById = new Map(churches.map((church) => [church.id, church]));
   let matches = [];
   let activeIndex = -1;
   let expandedUpcomingKey;
+  let previousFilters = JSON.stringify(filterStore?.getSnapshot().filters);
 
   const closeResults = () => {
     matches = [];
@@ -129,9 +132,10 @@ export function initialiseChurchSearch(churches, navigation) {
   };
 
   const renderBookmarks = () => {
+    const availableIds = new Set(availableChurches.map(church => church.id));
     const bookmarkedChurches = getBookmarkedChurchIds().flatMap((churchId) => {
       const church = churchesById.get(churchId);
-      return church ? [church] : [];
+      return church && availableIds.has(church.id) ? [church] : [];
     });
 
     if (!bookmarkedChurches.length) {
@@ -164,7 +168,7 @@ export function initialiseChurchSearch(churches, navigation) {
 
   const renderUpcomingMasses = () => {
     const upcomingMasses = getUpcomingMasses(
-      churches,
+      availableChurches,
       new Date(),
       Number.MAX_SAFE_INTEGER
     );
@@ -304,8 +308,15 @@ export function initialiseChurchSearch(churches, navigation) {
   };
 
   const renderChurchMatches = () => {
-    const churchesFound = getMatches(index, input.value);
+    const churchesFound = input.value.trim() ? getMatches(index, input.value) : availableChurches;
     matches = churchesFound.map((church) => ({ church }));
+
+    if (filterStore && hasActiveFilters(filterStore.getSnapshot().filters)) {
+      const heading = document.createElement("p");
+      heading.className = "church-search__heading";
+      heading.textContent = input.value.trim() ? "Matching churches" : `${churchesFound.length} matching churches`;
+      results.append(heading);
+    }
 
     if (!matches.length) {
       const empty = document.createElement("p");
@@ -345,6 +356,14 @@ export function initialiseChurchSearch(churches, navigation) {
       option.append(name);
       if (alternateName.textContent) option.append(alternateName);
       option.append(address);
+      if (filterStore && hasActiveFilters(filterStore.getSnapshot().filters) && church.masses.length) {
+        const times = document.createElement("span");
+        times.className = "church-search__matching-times";
+        const { dayMode } = filterStore.getSnapshot().filters;
+        const summaries = [...new Set(church.masses.map(mass => `${dayMode === "any" ? `${mass.day.slice(0, 3)} ` : ""}${mass.time} ${mass.language || "Language not listed"}`))];
+        times.textContent = summaries.slice(0, 3).join(" · ") + (summaries.length > 3 ? ` · +${summaries.length - 3} more` : "");
+        option.append(times);
+      }
       results.append(option);
     });
   };
@@ -355,7 +374,7 @@ export function initialiseChurchSearch(churches, navigation) {
     input.removeAttribute("aria-activedescendant");
     results.replaceChildren();
 
-    if (input.value.trim()) {
+    if (input.value.trim() || (filterStore && hasActiveFilters(filterStore.getSnapshot().filters))) {
       renderChurchMatches();
     } else {
       renderUpcomingMasses();
@@ -400,7 +419,16 @@ export function initialiseChurchSearch(churches, navigation) {
     if (!results.hidden && !input.value.trim()) renderResults();
   };
   window.addEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
+  const unsubscribeFilters = filterStore?.subscribe(snapshot => {
+    availableChurches = snapshot.churches;
+    index = availableChurches.map(createSearchEntry);
+    const nextFilters = JSON.stringify(snapshot.filters);
+    const changed = nextFilters !== previousFilters;
+    previousFilters = nextFilters;
+    if (!results.hidden || (changed && hasActiveFilters(snapshot.filters))) renderResults();
+  });
   return () => {
+    unsubscribeFilters?.();
     window.clearInterval(upcomingMassTimer);
     window.removeEventListener(BOOKMARKS_CHANGED_EVENT, refreshOpenBookmarks);
   };

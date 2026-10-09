@@ -70,7 +70,74 @@ body {
   top: 18px;
   left: 18px;
   width: min(390px, calc(100vw - 92px));
+  max-height: calc(100dvh - 36px);
+  display: flex;
+  flex-direction: column;
 }
+
+.church-search__field { flex-shrink: 0; }
+
+.church-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 5px 8px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgb(255 253 248 / 96%);
+  box-shadow: 0 6px 18px rgb(23 64 78 / 12%);
+  font-size: 0.78rem;
+}
+
+.church-filter-bar button, .church-filters button {
+  min-height: 36px;
+  border: 1px solid #bac8ca;
+  border-radius: 8px;
+  padding: 6px 12px;
+  background: #fffdf8;
+  color: #244d5b;
+  font: inherit;
+  cursor: pointer;
+}
+
+.church-filter-bar button.is-active { background: #cf142b; color: #fff; border-color: #cf142b; }
+.church-filter-bar button { flex-shrink: 0; white-space: nowrap; }
+#filter-summary { min-width: 0; line-height: 1.5; }
+.church-filter-bar button:disabled, .no-mass-toggle:disabled { opacity: 0.5; cursor: default; }
+.church-filters {
+  margin-top: 8px;
+  padding: 12px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  max-height: min(350px, calc(100dvh - 240px));
+  min-height: 0;
+  border-radius: 14px;
+  background: rgb(255 253 248 / 98%);
+  box-shadow: 0 10px 24px rgb(23 64 78 / 16%);
+}
+.church-filters[hidden], .church-filters label[hidden] { display: none; }
+.church-filters__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.church-filters label { display: flex; flex-direction: column; gap: 5px; font-size: 0.78rem; font-weight: 600; }
+.church-filters select, .church-search .church-filters input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 6px 8px;
+  border: 1px solid #bac8ca;
+  border-radius: 7px;
+  color: #1d2b31;
+  background: white;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+.church-filters__hint { font-size: 0.72rem; color: #586a70; line-height: 1.5; }
+#filter-error { color: #9e322b; font-size: 0.8rem; }
+.church-filters [aria-invalid="true"] { border-color: #9e322b; }
+.church-filters :focus-visible, .church-filter-bar button:focus-visible { outline: 2px solid #1a6f8a; outline-offset: 2px; }
+.church-filter-bar button.is-active:focus-visible { outline-color: rgb(207 20 43 / 30%); }
+.church-search__matching-times { color: #246379; font-size: 0.78rem; line-height: 1.5; }
 
 .church-search__field {
   position: relative;
@@ -135,6 +202,8 @@ body {
   box-shadow: 0 16px 34px rgb(23 64 78 / 20%);
   backdrop-filter: blur(16px);
   scrollbar-width: thin;
+  min-height: 0;
+  flex-shrink: 1;
 }
 
 .church-search__results[hidden] {
@@ -386,12 +455,14 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .reset-view:hover {
+  .reset-view:hover,
+  .church-filter-bar button.is-active:hover {
     background: #a5122a;
   }
 }
 
-.reset-view:active {
+.reset-view:active,
+.church-filter-bar button.is-active:active {
   background: #8b0f23;
 }
 
@@ -1284,9 +1355,10 @@ body {
     top: 12px;
     left: 12px;
     width: calc(100vw - 76px);
+    max-height: calc(100dvh - 24px);
   }
 
-  .church-search input {
+  .church-search__field input {
     height: 46px;
   }
 

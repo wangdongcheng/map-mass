@@ -119,6 +119,24 @@ function fixture({ languages = ["English", "Maltese", "Italian"], masses, photoU
   return { controller, container, body, document, markers, advance, timers, removalHandlers, getSelections: () => selections };
 }
 
+test("marker Mass indicators follow filtered sessions and suppress live status for other dates", () => {
+  const english = { day: "Friday", time: "09:00", language: "English" };
+  const maltese = { day: "Friday", time: "18:00", language: "Maltese" };
+  const { controller, markers } = fixture({ masses: [english, maltese] });
+  const indicator = markers.find(marker => marker.element.className === "current-mass-marker-anchor").element;
+  assert.equal(indicator.hidden, false);
+  controller.setMassFilter([maltese]);
+  assert.equal(indicator.hidden, true, "English Mass is hidden by the Maltese filter");
+  controller.updateCurrentMassStatus(new Date("2026-10-09T07:30:00Z"));
+  assert.equal(indicator.hidden, true, "clock refresh retains the filter");
+  controller.setMassFilter([english], false);
+  assert.equal(indicator.hidden, true, "another selected date has no live indicator");
+  controller.setMassFilter([english]);
+  assert.equal(indicator.hidden, false);
+  controller.setVisible(false);
+  assert.equal(indicator.hidden, true);
+});
+
 test("photo click opens the full source without selecting the church and cleans up on dismissal", () => {
   const photoUrl = "/photos/test.jpg";
   const { controller, container, body, getSelections } = fixture({ photoUrl });

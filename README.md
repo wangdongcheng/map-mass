@@ -100,6 +100,10 @@ references/church-photos/0246/0246.png
 
 Supported extensions are `.jpg`, `.jpeg`, `.png`, `.webp`, and `.avif`. The folder name and file name must contain the same four-digit church ID. Other images in these folders are treated only as modeling references and are not included as church-card photos.
 
+## Global Mass filters
+
+The search toolbar's **Filters** panel filters map markers and search results together by Mass language, island (Malta or Gozo & Comino), today or a selected date, and start-time bounds. From and Until use hour selections from `00` to `23`, interpreted at the start of the selected hour; when both are set, Until must be greater than From. Conditions match the same Mass session; the filtered list shows its matching times. Dates and times use Europe/Malta, and selected dates follow the bundled weekly timetable rather than holiday exceptions. Clear filters to return to all scheduled churches; the whole-island reset also clears filters. Churches without listed times can be shown with the existing switch when no Mass schedule filters are active.
+
 ## Custom 3D church models
 
 Custom models are implemented as lightweight Three.js geometry rather than external model files. Each model has its own directory:

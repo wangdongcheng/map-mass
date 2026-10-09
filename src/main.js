@@ -8,6 +8,8 @@ import { initialiseMapAtmosphere } from "./map/map-atmosphere.js";
 import { getHomeView } from "./map/home-view.js";
 import { initialiseChurchSearch } from "./ui/church-search.js";
 import { createChurchNavigation } from "./ui/church-navigation.js";
+import { createChurchFilterStore, getFilterDate, getMaltaDate, hasScheduleFilters } from "./data/church-filters.js";
+import { initialiseChurchFilters } from "./ui/church-filters.js";
 
 const loading = document.querySelector("#loading");
 const loadingCard = document.querySelector(".loading-card");
@@ -19,15 +21,19 @@ const churchesPromise = loadChurches();
 let churchMarkers = [];
 let navigation;
 let showNoMassChurches = false;
+let filterStore;
 
 function updateNoMassChurchVisibility() {
+  if (filterStore) filterStore.update({ showNoMass: showNoMassChurches });
   churchMarkers.forEach(({ hasMassTimes, setVisible }) => {
-    if (!hasMassTimes) setVisible(showNoMassChurches);
+    if (!filterStore && !hasMassTimes) setVisible(showNoMassChurches);
   });
 
   noMassToggle.classList.toggle("is-active", showNoMassChurches);
   noMassToggle.setAttribute("aria-checked", String(showNoMassChurches));
-  noMassToggle.title = showNoMassChurches
+  noMassToggle.title = noMassToggle.disabled
+    ? "Clear Mass filters to show churches without times"
+    : showNoMassChurches
     ? "Hide churches without Mass times"
     : "Show churches without Mass times";
 }
@@ -38,6 +44,7 @@ map.on("load", async () => {
 
   try {
     const churches = await churchesPromise;
+    filterStore = createChurchFilterStore(churches);
     churchMarkers = churches.map((church) =>
       addChurchMarker(map, church, () => navigation.selectChurch(church.id))
     );
@@ -50,15 +57,27 @@ map.on("load", async () => {
       churchMarkersById,
       () => getHomeView(map)
     );
+    const disposeFilters = initialiseChurchFilters(churches, filterStore);
+    map.once("remove", disposeFilters);
+    const applyFilters = ({ churches: matches, filters }) => {
+      const matchesById = new Map(matches.map(church => [church.id, church]));
+      const selectedDate = getFilterDate(filters);
+      const liveStatus = selectedDate === null || selectedDate === getMaltaDate();
+      churchMarkers.forEach(controller => {
+        const match = matchesById.get(controller.churchId);
+        controller.setVisible(Boolean(match));
+        controller.setMassFilter(match?.masses ?? [], liveStatus);
+      });
+      noMassToggle.disabled = hasScheduleFilters(filters);
+      noMassToggle.title = noMassToggle.disabled ? "Clear Mass filters to show churches without times" : showNoMassChurches ? "Hide churches without Mass times" : "Show churches without Mass times";
+    };
+    map.once("remove", filterStore.subscribe(applyFilters));
     updateNoMassChurchVisibility();
-    const disposeSearch = initialiseChurchSearch(churches, navigation);
+    const disposeSearch = initialiseChurchSearch(churches, navigation, filterStore);
     map.once("remove", disposeSearch);
     navigation.applyPath();
     const refreshCurrentMasses = () => {
-      const now = new Date();
-      churchMarkers.forEach(({ updateCurrentMassStatus }) =>
-        updateCurrentMassStatus(now)
-      );
+      filterStore.refresh();
     };
     const currentMassTimer = window.setInterval(refreshCurrentMasses, 30_000);
     map.once("remove", () => window.clearInterval(currentMassTimer));
@@ -83,6 +102,7 @@ map.on("error", (event) => {
 
 resetView.addEventListener("click", () => {
   showNoMassChurches = false;
+  filterStore?.clear();
   updateNoMassChurchVisibility();
   if (navigation) {
     navigation.showHome();

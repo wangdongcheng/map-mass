@@ -85,6 +85,8 @@ export function addChurchMarker(map, church, onSelect) {
   currentMassAnchor.append(currentMass);
   let currentMassMarker;
   let isVisible = true;
+  let statusMasses = church.masses;
+  let showLiveStatus = true;
 
   const stopMapInteraction = (event) => event.stopPropagation();
   let hoverTimer;
@@ -253,12 +255,12 @@ export function addChurchMarker(map, church, onSelect) {
   };
 
   const updateCurrentMassStatus = (date = new Date()) => {
-    const current = getMassesInProgress(church.masses, date);
+    const current = getMassesInProgress(showLiveStatus ? statusMasses : [], date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
     const hasCurrentMass = activeTimes.size > 0;
     const startingSoon = hasCurrentMass
       ? null
-      : getNextMassStartingSoon(church.masses, date);
+      : getNextMassStartingSoon(showLiveStatus ? statusMasses : [], date);
     const hasIndicator = hasCurrentMass || startingSoon !== null;
     currentMass.hidden = !hasIndicator;
     currentMassAnchor.hidden = !hasIndicator || !isVisible;
@@ -292,7 +294,7 @@ export function addChurchMarker(map, church, onSelect) {
     currentMass.setAttribute("aria-label", statusLabel);
     currentMass.title = statusLabel;
 
-    details?.updateCurrentMass(current, date);
+    details?.updateCurrentMass(getMassesInProgress(church.masses, date), date);
   };
 
   updateCurrentMassStatus();
@@ -311,6 +313,11 @@ export function addChurchMarker(map, church, onSelect) {
     marker,
     showDetails,
     close: closeBubble,
+    setMassFilter(masses, liveStatus = true) {
+      statusMasses = masses;
+      showLiveStatus = liveStatus;
+      updateCurrentMassStatus();
+    },
     setVisible(visible) {
       if (!visible) closeBubble();
       isVisible = visible;
