@@ -2,7 +2,7 @@ import { createModel } from "./create-model.js";
 
 export const churchModel0202 = {
   churchId: "0202",
-  // Centre of the chapel spur in building:26569630-1473, not the school block.
+  // Retain the chapel centre as the anchor for the complete connected complex.
   coordinates: [14.5012584329, 35.9154454735],
   altitude: 0,
   // Local -X faces WNW onto Triq San Gwann Bosco, heading 293.53 degrees.

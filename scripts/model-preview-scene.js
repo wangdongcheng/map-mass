@@ -26,7 +26,8 @@ try {
   ground.position.set(center.x, bounds.min.y - 0.025, center.z);
   scene.add(ground);
   // Most facades face local -X; these models use a different entrance axis.
-  const direction = id === "0046" ? new THREE.Vector3(-0.8, 0.8, -1.3)
+  const direction = id === "0202" ? new THREE.Vector3(1.2, 1.65, -1)
+    : id === "0046" ? new THREE.Vector3(-0.8, 0.8, -1.3)
     : id === "0057" ? new THREE.Vector3(-0.9, 0.75, 1.3)
     : id === "0230" ? new THREE.Vector3(1.2, 0.8, 1)
     : new THREE.Vector3(-1.3, 0.8, 1);
