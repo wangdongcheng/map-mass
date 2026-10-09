@@ -13,8 +13,6 @@ const BUBBLE_POINTER_GAP = 2;
 const bubbleGroups = new WeakMap();
 
 function getBubbleGroup(map) {
-  const container = map.getContainer();
-
   if (bubbleGroups.has(map)) {
     return bubbleGroups.get(map);
   }
@@ -34,9 +32,9 @@ function getBubbleGroup(map) {
   };
 
   bubbleGroups.set(map, group);
-  container.addEventListener("click", dismissBubble);
+  document.addEventListener("click", dismissBubble, { capture: true });
   map.once("remove", () => {
-    container.removeEventListener("click", dismissBubble);
+    document.removeEventListener("click", dismissBubble, { capture: true });
     group.active?.close();
     bubbleGroups.delete(map);
   });
@@ -67,9 +65,9 @@ export function addChurchMarker(map, church, onSelect) {
   currentMass.type = "button";
   currentMass.setAttribute(
     "aria-label",
-    `Mass in progress at ${church.name}. Zoom to church.`
+    `Mass in progress at ${church.name}. Show church details.`
   );
-  currentMass.title = "Mass in progress — zoom to church";
+  currentMass.title = "Mass in progress — show church details";
 
   const currentMassIcon = document.createElement("span");
   currentMassIcon.className = "current-mass-indicator__pie";
@@ -171,6 +169,7 @@ export function addChurchMarker(map, church, onSelect) {
   const bubbleController = { close: closeBubble };
 
   const openBubble = () => {
+    window.clearTimeout(hoverTimer);
     ensureBubble();
     updateCurrentMassStatus();
     updateBubblePointer();
@@ -200,8 +199,10 @@ export function addChurchMarker(map, church, onSelect) {
 
   cross.addEventListener("pointerdown", stopMapInteraction);
   currentMass.addEventListener("pointerdown", stopMapInteraction);
-  cross.addEventListener("focus", openBubble);
-  cross.addEventListener("click", openBubble);
+  for (const trigger of [cross, currentMass]) {
+    trigger.addEventListener("focus", openBubble);
+    trigger.addEventListener("click", openBubble);
+  }
 
   const handlePointerEnter = (event) => {
     if (event.pointerType !== "mouse") {
@@ -251,11 +252,6 @@ export function addChurchMarker(map, church, onSelect) {
     focusBubbleAtSide();
   };
 
-  currentMass.addEventListener("click", (event) => {
-    event.stopPropagation();
-    onSelect();
-  });
-
   const updateCurrentMassStatus = (date = new Date()) => {
     const current = getMassesInProgress(church.masses, date);
     const activeTimes = new Set(current.masses.map(({ time }) => time));
@@ -287,12 +283,12 @@ export function addChurchMarker(map, church, onSelect) {
     const statusLabel = hasCurrentMass
       ? `Mass in progress at ${church.name}. About ${current.remainingMinutes} ${
           current.remainingMinutes === 1 ? "minute" : "minutes"
-        } remaining (estimated 60-minute Mass). Zoom to church.`
+        } remaining (estimated 60-minute Mass). Show church details.`
       : startingSoon
         ? `Mass starts in ${startingSoon.minutesUntilStart} ${
             startingSoon.minutesUntilStart === 1 ? "minute" : "minutes"
-          } at ${church.name} (${startingSoon.mass.time}). Zoom to church.`
-        : `Show Mass times for ${church.name}. Zoom to church.`;
+          } at ${church.name} (${startingSoon.mass.time}). Show church details.`
+        : `Show Mass times for ${church.name}.`;
     currentMass.setAttribute("aria-label", statusLabel);
     currentMass.title = statusLabel;
 
