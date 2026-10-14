@@ -21,7 +21,7 @@ const map = createMaltaMap("map");
 const churchesPromise = loadChurches();
 let churchMarkers = [];
 let navigation;
-let showNoMassChurches = false;
+let showNoMassChurches = true;
 let filterStore;
 
 function updateNoMassChurchVisibility() {
@@ -44,7 +44,17 @@ map.on("load", async () => {
   initialiseMapAtmosphere(map);
 
   try {
-    const churches = await churchesPromise;
+    const [allChurches, { churchModelRegistry }] = await Promise.all([
+      churchesPromise,
+      import("./map/church-models/index.js")
+    ]);
+    const noMassChurchIds = new Set(
+      allChurches.filter((church) => !church.hasMassTimes).slice(0, 5)
+        .map((church) => church.id)
+    );
+    const churches = allChurches.filter((church) =>
+      churchModelRegistry.has(church.id) || noMassChurchIds.has(church.id)
+    );
     filterStore = createChurchFilterStore(churches);
     churchMarkers = churches.map((church) =>
       addChurchMarker(map, church, () => navigation.selectChurch(church.id))
@@ -103,7 +113,7 @@ map.on("error", (event) => {
 });
 
 resetView.addEventListener("click", () => {
-  showNoMassChurches = false;
+  showNoMassChurches = true;
   filterStore?.clear();
   updateNoMassChurchVisibility();
   if (navigation) {
