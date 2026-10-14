@@ -571,6 +571,10 @@ body {
   gap: 6px;
 }
 
+.map-footer-links a[hidden] {
+  display: none;
+}
+
 .powered-by,
 .github-link,
 .email-link {
