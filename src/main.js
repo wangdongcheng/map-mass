@@ -21,7 +21,7 @@ const map = createMaltaMap("map");
 const churchesPromise = loadChurches();
 let churchMarkers = [];
 let navigation;
-let showNoMassChurches = true;
+let showNoMassChurches = false;
 let filterStore;
 
 function updateNoMassChurchVisibility() {
@@ -113,7 +113,7 @@ map.on("error", (event) => {
 });
 
 resetView.addEventListener("click", () => {
-  showNoMassChurches = true;
+  showNoMassChurches = false;
   filterStore?.clear();
   updateNoMassChurchVisibility();
   if (navigation) {
